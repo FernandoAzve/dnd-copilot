@@ -2,25 +2,29 @@ import streamlit as st
 
 def apply_custom_styles(theme_mode: str = "dark"):
     """
-    Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), forçando as variáveis de acordo com a seleção ativa.
+    Aplica estilo visual temático de RPG com suporte a Modo Escuro (Grimório)
+    e Modo Claro (Pergaminho Arcano), garantindo contraste absoluto em todos os elementos.
     """
     is_light = (theme_mode == "light")
 
     if is_light:
-        vars_css = """
+        custom_css = """
+        <style>
+        /* ==========================================
+           MODO CLARO (PERGAMINHO ARCANO)
+           ========================================== */
         :root {
-            --app-bg: #f8f5ee;
-            --sidebar-bg: #eee8dc;
+            --app-bg: #f7f4ec;
+            --sidebar-bg: #ece5d6;
             --primary-gold: #8a5d14;
-            --bright-gold: #74460a;
-            --text-main: #231f18;
-            --text-muted: #5e5648;
+            --bright-gold: #6b3f02;
+            --text-main: #1c1813;
+            --text-muted: #4e4436;
             --border-color: #cfc1a5;
             
             --pill-bg: linear-gradient(135deg, #ffffff 0%, #f4ede1 100%);
             --pill-border: #cfc1a5;
-            --pill-name: #231f18;
+            --pill-name: #1c1813;
             --pill-role: #8a5d14;
             
             --chat-msg-bg: #ffffff;
@@ -28,18 +32,195 @@ def apply_custom_styles(theme_mode: str = "dark"):
             
             --btn-bg: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%);
             --btn-border: #c9b999;
-            --btn-text: #2a241b;
+            --btn-text: #1c1813;
             --btn-hover-bg: linear-gradient(180deg, #faf7f0 0%, #e4d8c2 100%);
             
             --input-bg: #ffffff;
-            --input-border: #c9b999;
-            --input-text: #231f18;
+            --input-border: #c4b595;
+            --input-text: #1c1813;
             
             --scrollbar-thumb: #c4b595;
         }
+
+        .stApp {
+            background-color: var(--app-bg) !important;
+            color: #1c1813 !important;
+        }
+
+        section[data-testid="stSidebar"] {
+            background-color: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+
+        /* Tipografia de Alta Legibilidade */
+        h1, h2, h3, h4, h5, h6 {
+            color: #6b3f02 !important;
+            font-family: 'Cinzel', 'Georgia', serif;
+            font-weight: 700;
+        }
+
+        p, span, li, label, [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] span, [data-testid="stMarkdownContainer"] li {
+            color: #1c1813 !important;
+        }
+
+        strong, b {
+            color: #0d0a07 !important;
+            font-weight: 700;
+        }
+
+        .stCaption, [data-testid="stCaptionContainer"], small {
+            color: #4e4436 !important;
+        }
+
+        /* Balões de Chat */
+        .stChatMessage {
+            background-color: #ffffff !important;
+            border: 1px solid #ded3bc !important;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            color: #1c1813 !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+
+        /* Tabelas */
+        table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+            margin: 10px 0 !important;
+            color: #1c1813 !important;
+        }
+
+        table th {
+            background-color: #ebd8b8 !important;
+            color: #1c1813 !important;
+            border: 1px solid #cfc1a5 !important;
+            padding: 8px !important;
+            font-weight: bold !important;
+        }
+
+        table td {
+            background-color: #ffffff !important;
+            color: #1c1813 !important;
+            border: 1px solid #ded3bc !important;
+            padding: 8px !important;
+        }
+
+        /* Blocos de Código */
+        pre, code {
+            background-color: #ede5d5 !important;
+            color: #7c2223 !important;
+            border: 1px solid #cfc1a5 !important;
+            border-radius: 4px;
+        }
+
+        /* Caixas de Texto, Inputs e Dropdowns */
+        input, textarea, [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
+            background-color: #ffffff !important;
+            color: #1c1813 !important;
+            border: 1px solid #c4b595 !important;
+        }
+
+        [data-baseweb="select"] * {
+            color: #1c1813 !important;
+        }
+
+        /* Expansores */
+        div[data-testid="stExpander"] details {
+            background-color: #f2ece0 !important;
+            border: 1px solid #cfc1a5 !important;
+            border-radius: 6px !important;
+        }
+
+        div[data-testid="stExpander"] summary {
+            color: #1c1813 !important;
+            font-weight: 600;
+        }
+
+        /* Botões */
+        .stButton > button {
+            background: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%) !important;
+            color: #1c1813 !important;
+            border: 1px solid #c9b999 !important;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .stButton > button:hover {
+            background: linear-gradient(180deg, #faf7f0 0%, #e4d8c2 100%) !important;
+            border-color: #8a5d14 !important;
+            box-shadow: 0 0 8px rgba(138, 93, 20, 0.3) !important;
+        }
+
+        .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {
+            background: linear-gradient(180deg, #a36f1c 0%, #7c500c 100%) !important;
+            color: #ffffff !important;
+            border: 1px solid #5a3804 !important;
+            font-weight: 700;
+        }
+
+        .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {
+            background: linear-gradient(180deg, #b87e22 0%, #8f5c10 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(138, 93, 20, 0.4) !important;
+        }
+
+        /* Cabeçalho e Badge */
+        .app-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #cfc1a5;
+        }
+
+        .app-header-title {
+            margin: 0 !important;
+            font-size: 1.75rem !important;
+            color: #6b3f02 !important;
+            font-family: 'Cinzel', 'Georgia', serif;
+            font-weight: 700;
+        }
+
+        .app-header-subtitle {
+            margin: 4px 0 0 0 !important;
+            font-size: 0.88rem !important;
+            color: #4e4436 !important;
+            font-style: italic;
+        }
+
+        .user-profile-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #ffffff 0%, #f4ede1 100%);
+            border: 1px solid #cfc1a5;
+            border-radius: 24px;
+            padding: 6px 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .user-profile-name {
+            font-weight: 700;
+            color: #1c1813;
+            font-size: 0.88rem;
+        }
+
+        .user-profile-role {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #8a5d14;
+        }
+        </style>
         """
     else:
-        vars_css = """
+        custom_css = """
+        <style>
+        /* ==========================================
+           MODO ESCURO (GRIMÓRIO SOMBRIO)
+           ========================================== */
         :root {
             --app-bg: #0f1115;
             --sidebar-bg: #14171d;
@@ -68,216 +249,238 @@ def apply_custom_styles(theme_mode: str = "dark"):
             
             --scrollbar-thumb: #342d20;
         }
+
+        .stApp {
+            background-color: var(--app-bg) !important;
+            color: #e8e3d9 !important;
+        }
+
+        section[data-testid="stSidebar"] {
+            background-color: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+
+        /* Tipografia */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--bright-gold) !important;
+            font-family: 'Cinzel', 'Georgia', serif;
+            font-weight: 700;
+        }
+
+        p, span, li, label, [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] span, [data-testid="stMarkdownContainer"] li {
+            color: #e8e3d9 !important;
+        }
+
+        strong, b {
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+
+        .stCaption, [data-testid="stCaptionContainer"], small {
+            color: #a09a8f !important;
+        }
+
+        /* Balões de Chat */
+        .stChatMessage {
+            background-color: #171b22 !important;
+            border: 1px solid #2d3442 !important;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            color: #e8e3d9 !important;
+        }
+
+        /* Tabelas */
+        table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+            margin: 10px 0 !important;
+            color: #e8e3d9 !important;
+        }
+
+        table th {
+            background-color: #222834 !important;
+            color: #e5b967 !important;
+            border: 1px solid #3d3424 !important;
+            padding: 8px !important;
+            font-weight: bold !important;
+        }
+
+        table td {
+            background-color: #171b22 !important;
+            color: #e8e3d9 !important;
+            border: 1px solid #2d3442 !important;
+            padding: 8px !important;
+        }
+
+        /* Blocos de Código */
+        pre, code {
+            background-color: #12151b !important;
+            color: #f38d8e !important;
+            border: 1px solid #3d3424 !important;
+            border-radius: 4px;
+        }
+
+        /* Caixas de Texto, Inputs e Dropdowns */
+        input, textarea, [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
+            background-color: #1a1e27 !important;
+            color: #f1ebd9 !important;
+            border: 1px solid #3d3424 !important;
+        }
+
+        /* Expansores */
+        div[data-testid="stExpander"] details {
+            background-color: #171b22 !important;
+            border: 1px solid #3d3424 !important;
+            border-radius: 6px !important;
+        }
+
+        div[data-testid="stExpander"] summary {
+            color: #e8e3d9 !important;
+            font-weight: 600;
+        }
+
+        /* Botões */
+        .stButton > button {
+            background: linear-gradient(180deg, #282f3c 0%, #191e27 100%) !important;
+            color: #f1ebd9 !important;
+            border: 1px solid #3d3424 !important;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .stButton > button:hover {
+            background: linear-gradient(180deg, #374154 0%, #232a36 100%) !important;
+            border-color: #e5b967 !important;
+            box-shadow: 0 0 8px rgba(229, 185, 103, 0.3) !important;
+        }
+
+        .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {
+            background: linear-gradient(180deg, #c99a4e 0%, #a8792c 100%) !important;
+            color: #1a1408 !important;
+            border: 1px solid #7c581d !important;
+            font-weight: 700;
+        }
+
+        .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {
+            background: linear-gradient(180deg, #dfb15b 0%, #bd8c36 100%) !important;
+            color: #000000 !important;
+            box-shadow: 0 0 12px rgba(229, 185, 103, 0.5) !important;
+        }
+
+        /* Cabeçalho e Badge */
+        .app-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3d3424;
+        }
+
+        .app-header-title {
+            margin: 0 !important;
+            font-size: 1.75rem !important;
+            color: #e5b967 !important;
+            font-family: 'Cinzel', 'Georgia', serif;
+            font-weight: 700;
+        }
+
+        .app-header-subtitle {
+            margin: 4px 0 0 0 !important;
+            font-size: 0.88rem !important;
+            color: #a09a8f !important;
+            font-style: italic;
+        }
+
+        .user-profile-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #1b202a 0%, #12151b 100%);
+            border: 1px solid #3d3424;
+            border-radius: 24px;
+            padding: 6px 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .user-profile-name {
+            font-weight: 700;
+            color: #f5f0e1;
+            font-size: 0.88rem;
+        }
+
+        .user-profile-role {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #e5b967;
+        }
+        </style>
         """
 
-    custom_css = f"""
+    # Responsividade e Scrollbar
+    common_css = """
     <style>
-    {vars_css}
-
-    /* Estrutura Geral */
-    .stApp {{
-        background-color: var(--app-bg) !important;
-        color: var(--text-main) !important;
-        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    }}
-
-    section[data-testid="stSidebar"] {{
-        background-color: var(--sidebar-bg) !important;
-        border-right: 1px solid var(--border-color) !important;
-    }}
-
-    /* Tipografia e Títulos */
-    h1, h2, h3, h4, h5, h6 {{
-        color: var(--bright-gold) !important;
-        font-family: 'Cinzel', 'Georgia', serif;
-        letter-spacing: 0.5px;
-    }}
-
-    p, span, label, div {{
-        color: inherit;
-    }}
-
-    /* Cabeçalho Principal e Badge de Usuário */
-    .app-header-container {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
-    }}
-
-    .app-header-titles {{
-        flex: 1 1 300px;
-    }}
-
-    .app-header-title {{
-        margin: 0 !important;
-        font-size: 1.75rem !important;
-        color: var(--bright-gold) !important;
-        font-family: 'Cinzel', 'Georgia', serif;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }}
-
-    .app-header-subtitle {{
-        margin: 4px 0 0 0 !important;
-        font-size: 0.88rem !important;
-        color: var(--text-muted) !important;
-        font-style: italic;
-    }}
-
-    .user-profile-pill {{
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--pill-bg);
-        border: 1px solid var(--pill-border);
-        border-radius: 24px;
-        padding: 6px 16px;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-        transition: all 0.2s ease;
-    }}
-
-    .user-profile-pill:hover {{
-        border-color: var(--bright-gold);
-        box-shadow: 0 0 10px rgba(201, 154, 78, 0.25);
-    }}
-
-    .user-profile-avatar {{
-        font-size: 1.3rem;
-        line-height: 1;
-    }}
-
-    .user-profile-info {{
-        display: flex;
-        flex-direction: column;
-        line-height: 1.25;
-    }}
-
-    .user-profile-name {{
-        font-weight: 700;
-        color: var(--pill-name);
-        font-size: 0.88rem;
-    }}
-
-    .user-profile-role {{
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--pill-role);
-    }}
-
-    /* Botões e Componentes Interativos */
-    .stButton > button {{
-        background: var(--btn-bg) !important;
-        color: var(--btn-text) !important;
-        border: 1px solid var(--btn-border) !important;
-        border-radius: 6px;
-        font-weight: 600;
-        min-height: 38px;
-        transition: all 0.2s ease;
-    }}
-
-    .stButton > button:hover {{
-        background: var(--btn-hover-bg) !important;
-        border-color: var(--bright-gold) !important;
-        box-shadow: 0 0 8px rgba(201, 154, 78, 0.3);
-    }}
-
-    /* Botão Primário (Dourado de Destaque) */
-    .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {{
-        background: linear-gradient(180deg, #c99a4e 0%, #a8792c 100%) !important;
-        color: #1a1408 !important;
-        border: 1px solid #7c581d !important;
-        font-weight: 700;
-    }}
-
-    .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {{
-        background: linear-gradient(180deg, #dfb15b 0%, #bd8c36 100%) !important;
-        color: #000000 !important;
-        box-shadow: 0 0 12px rgba(201, 154, 78, 0.5) !important;
-    }}
-
-    /* Balões de Chat */
-    .stChatMessage {{
-        background: var(--chat-msg-bg) !important;
-        border: 1px solid var(--chat-msg-border) !important;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        color: var(--text-main) !important;
-    }}
-
-    /* Expansores */
-    .streamlit-expanderHeader {{
-        background-color: var(--chat-msg-bg) !important;
-        border-radius: 6px !important;
-        color: var(--text-main) !important;
-    }}
-
-    /* Responsividade */
-    @media (max-width: 992px) {{
-        .app-header-title {{
+    @media (max-width: 992px) {
+        .app-header-title {
             font-size: 1.45rem !important;
-        }}
-        .user-profile-pill {{
+        }
+        .user-profile-pill {
             padding: 5px 12px;
-        }}
-        .user-profile-name {{
+        }
+        .user-profile-name {
             font-size: 0.82rem;
-        }}
-    }}
+        }
+    }
 
-    @media (max-width: 640px) {{
-        .app-header-container {{
+    @media (max-width: 640px) {
+        .app-header-container {
             flex-direction: column;
             align-items: stretch;
             gap: 10px;
-        }}
-        .app-header-title {{
+        }
+        .app-header-title {
             font-size: 1.25rem !important;
-        }}
-        .app-header-subtitle {{
+        }
+        .app-header-subtitle {
             font-size: 0.78rem !important;
-        }}
-        .user-profile-pill {{
+        }
+        .user-profile-pill {
             width: 100%;
             justify-content: flex-start;
             border-radius: 8px;
-        }}
-        .stButton > button {{
+        }
+        .stButton > button {
             min-height: 42px;
-        }}
-        .stChatMessage {{
+        }
+        .stChatMessage {
             padding: 8px !important;
             font-size: 0.9rem;
-        }}
-        table {{
+        }
+        table {
             display: block;
             max-width: 100%;
             overflow-x: auto;
             white-space: nowrap;
-        }}
-    }}
+        }
+    }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {{
+    ::-webkit-scrollbar {
         width: 7px;
         height: 7px;
-    }}
-    ::-webkit-scrollbar-track {{
+    }
+    ::-webkit-scrollbar-track {
         background: var(--app-bg);
-    }}
-    ::-webkit-scrollbar-thumb {{
+    }
+    ::-webkit-scrollbar-thumb {
         background: var(--scrollbar-thumb);
         border-radius: 4px;
-    }}
-    ::-webkit-scrollbar-thumb:hover {{
+    }
+    ::-webkit-scrollbar-thumb:hover {
         background: var(--bright-gold);
-    }}
+    }
     </style>
     """
-    st.markdown(custom_css, unsafe_allow_html=True)
+
+    st.markdown(custom_css + common_css, unsafe_allow_html=True)
