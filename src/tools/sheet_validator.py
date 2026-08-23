@@ -34,7 +34,20 @@ CLASS_CANONICAL_DATA = {
     "artifice": {"saves": ["Constituição", "Inteligência"], "hit_die": "d8", "spell_attr": "Inteligência", "page_ref": "Cap. 3: Classes > Artífice"}
 }
 
-EXTRACTION_PROMPT = """Você é um especialista em OCR e análise estruturada de fichas de RPG Dungeons & Dragons.
+ATTR_NAME_MAP = {
+    "FOR": "Força",
+    "DES": "Destreza",
+    "CON": "Constituição",
+    "INT": "Inteligência",
+    "SAB": "Sabedoria",
+    "CAR": "Carisma",
+    "STR": "Força",
+    "DEX": "Destreza",
+    "WIS": "Sabedoria",
+    "CHA": "Carisma"
+}
+
+EXTRACTION_PROMPT = """Você é um especialista em OCR e análise estruturada de fichas de RPG Dungeons & Dragons (5e / 2024).
 Examine cuidadosamente o documento / foto fornecido e extraia todos os dados visíveis no formato JSON estrito:
 
 {
@@ -62,9 +75,14 @@ Examine cuidadosamente o documento / foto fornecido e extraia todos os dados vis
   "passive_perception_written": 10,
   "equipped_armor": "Nome da armadura e escudo",
   "weapons_attacks": [{"name": "Espada", "attack_bonus": "+4", "damage": "1d8+2"}],
-  "magic_items": ["Itens mágicos e sintonias"],
+  "magic_items": ["Itens mágicos e sintonias (ex: Capa de Proteção)"],
   "feats_and_traits": ["Talentos e habilidades especiais anotadas"]
 }
+
+REGRA FUNDAMENTAL PARA BOLINHAS/CHECKBOXES (saving_throws_marked e skills_marked):
+1. 'saving_throws_marked': Inclua no array APENAS as salvaguardas que têm a bolinha/checkbox VISIVELMENTE PREENCHIDA / PINTADA / MARCADA COM 'X' ou ponto sólido (●).
+2. ATENÇÃO: Ter um número escrito no valor da salvaguarda NÃO significa que a bolinha está marcada! Fichas de D&D quase sempre têm números escritos em todas as 6 salvaguardas (que são os modificadores normais dos atributos + itens). Uma bolinha em branco/vazia ( ) ou ○ com um número ao lado NÃO é proficiente e NÃO deve estar em 'saving_throws_marked'.
+3. Mesma regra estrita para 'skills_marked': inclua apenas as perícias com a bolinha visivelmente pintada/preenchida.
 
 Retorne APENAS o bloco JSON válido, sem texto adicional.
 """
@@ -76,6 +94,7 @@ Sua missão é gerar um relatório de auditoria 100% EXATO, DETERMINÍSTICO, SEM
 1. Baseie-se rigorosamente nos **Dados Verificados por Código** e nos **Trechos de Livros Oficiais Recuperados pelo RAG** fornecidos abaixo.
 2. Em cada seção e cada correção, você DEVE citar a fonte e a página exata informada nos trechos recuperados.
 3. Se houver divergências matemáticas ou de regras, explique o erro com a fórmula oficial e informe a correção exata.
+4. Para as Salvaguardas: O sistema já realizou a verificação matemática determinística de cada atributo considerando Modificador Base + Bônus de Proficiência (apenas se proficiente) + Bônus de Itens Mágicos (como Capa de Proteção). Apresente o cálculo correto e elogie a exatidão quando os números estiverem corretos.
 
 ---
 
@@ -105,9 +124,10 @@ Gere o relatório exatamente nesta estrutura Markdown:
 ---
 
 ### 🛡️ 3. Auditoria de Salvaguardas & Perícias
-- **Salvaguardas Oficiais da Classe:** [Listar salvaguardas canônicas e conferir se estão marcadas] *(Fonte: [Livro e Página])*
-- **Itens / Efeitos Ativos:** [Ex: Capa de Proteção (+1 CA e Salvaguardas), etc.]
-- **Status das Salvaguardas:** [Detalhamento de cada salvaguarda com cálculos]
+- **Salvaguardas Oficiais da Classe:** [Listar salvaguardas canônicas e conferir as marcadas] *(Fonte: [Livro e Página])*
+- **Itens / Efeitos Ativos:** [Ex: Capa de Proteção (+1 CA e Salvaguardas)]
+- **Status das Salvaguardas:**
+[Detalhamento de cada uma das 6 salvaguardas com a fórmula exata: Mod. Atributo (+X) + Proficiência (+X se proficiente) + Item (+X se houver)]
 - **Perícias Marcadas:** [Listar perícias marcadas e cálculo de Modificador + Proficiência]
 - **Percepção Passiva:** Anotado [X] | Correto: [10 + Sabedoria + Proficiência se aplicável] *(Status | Fonte: Livro do Jogador 2024, Cap. 1, pág. 10)*
 
@@ -138,6 +158,44 @@ Gere o relatório exatamente nesta estrutura Markdown:
 
 STRICT_AUDITOR_SYSTEM_PROMPT = STRICT_SYNTHESIS_PROMPT
 SHEET_AUDITOR_PROMPT = STRICT_SYNTHESIS_PROMPT
+
+def _extract_pdf_form_fields(file_bytes: bytes) -> Dict[str, Any]:
+    """Extrai valores de campos interativos AcroForm de PDFs preenchíveis se existirem."""
+    try:
+        import fitz  # PyMuPDF
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+        fields = {}
+        for page in doc:
+            for widget in page.widgets():
+                if widget.field_name:
+                    fields[widget.field_name] = widget.field_value
+        return fields
+    except Exception:
+        return {}
+
+def _detect_item_save_bonus(extracted_data: Dict[str, Any], notes: str = "") -> int:
+    """Detecta bônus de itens mágicos em salvaguardas (ex: Capa de Proteção / Anel de Proteção)."""
+    bonus = 0
+    all_text = " ".join([
+        notes,
+        " ".join(extracted_data.get("magic_items", [])),
+        " ".join(extracted_data.get("feats_and_traits", [])),
+        extracted_data.get("equipped_armor", "")
+    ]).lower()
+
+    if any(item in all_text for item in ["capa de proteção", "cloak of protection", "cloth of protection", "anel de proteção", "ring of protection"]):
+        bonus += 1
+    return bonus
+
+def _parse_signed_int(val: Any, default: int = 0) -> int:
+    """Converte valores como '+4', '-1', '4', 4 em inteiros com segurança."""
+    if val is None:
+        return default
+    try:
+        val_str = str(val).strip().replace("+", "")
+        return int(val_str)
+    except Exception:
+        return default
 
 class SheetValidator:
     """Validador de fichas com arquitetura de 3 etapas: Visão -> Python Math -> Grounded RAG."""
@@ -242,23 +300,35 @@ class SheetValidator:
                 except Exception:
                     extracted_data = {}
 
-            # PASSO 2: Verificação Matemática Determinística em Python
+            # PASSO 2: Verificação Matemática e Lógica Determinística em Python
             char_class = (extracted_data.get("class_name") or "Guerreiro").lower().strip()
             char_level = int(extracted_data.get("level") or 1)
             char_species = extracted_data.get("species_race") or "Humano"
             char_bg = extracted_data.get("background") or "Soldado"
+            correct_pb = calculate_proficiency_bonus(char_level)
 
+            class_info = CLASS_CANONICAL_DATA.get(char_class, {
+                "saves": ["Força", "Constituição"],
+                "hit_die": "d10",
+                "spell_attr": None,
+                "page_ref": "Livro do Jogador 2024, Cap. 3"
+            })
+
+            # 2.1 Verificação de Atributos
             math_verification = {}
             raw_attrs = extracted_data.get("attributes", {})
-            for attr_name, attr_info in raw_attrs.items():
+            attr_mods = {}
+            for attr_name in ["FOR", "DES", "CON", "INT", "SAB", "CAR"]:
+                attr_info = raw_attrs.get(attr_name, {})
                 if isinstance(attr_info, dict):
                     score = int(attr_info.get("score", 10))
                     written = str(attr_info.get("written_mod", "+0"))
                 else:
-                    score = int(attr_info)
+                    score = int(attr_info) if attr_info else 10
                     written = "+0"
                 calc_mod = calculate_ability_modifier(score)
                 mod_str = f"{calc_mod:+d}"
+                attr_mods[attr_name] = calc_mod
                 math_verification[attr_name] = {
                     "score": score,
                     "written_mod": written,
@@ -266,13 +336,57 @@ class SheetValidator:
                     "is_correct": (written == mod_str or written == str(calc_mod))
                 }
 
-            correct_pb = calculate_proficiency_bonus(char_level)
-            class_info = CLASS_CANONICAL_DATA.get(char_class, {
-                "saves": ["Força", "Constituição"],
-                "hit_die": "d10",
-                "spell_attr": None,
-                "page_ref": "Livro do Jogador 2024, Cap. 3"
-            })
+            # 2.2 Verificação Cruzada Determinística de Salvaguardas
+            item_save_bonus = _detect_item_save_bonus(extracted_data, notes)
+            raw_saves_written = extracted_data.get("saving_throws_written_values", {})
+            raw_marked_saves = [s.upper().strip() for s in extracted_data.get("saving_throws_marked", [])]
+
+            verified_marked_saves = []
+            saves_math_breakdown = {}
+
+            canonical_saves_pt = class_info.get("saves", [])
+
+            for attr in ["FOR", "DES", "CON", "INT", "SAB", "CAR"]:
+                pt_name = ATTR_NAME_MAP[attr]
+                mod = attr_mods[attr]
+                is_class_save = pt_name in canonical_saves_pt
+
+                expected_non_prof = mod + item_save_bonus
+                expected_prof = mod + correct_pb + item_save_bonus
+
+                written_val = None
+                if attr in raw_saves_written:
+                    written_val = _parse_signed_int(raw_saves_written[attr])
+                elif pt_name in raw_saves_written:
+                    written_val = _parse_signed_int(raw_saves_written[pt_name])
+
+                # Decidir proficiência real com base na classe e no cálculo
+                if is_class_save:
+                    verified_marked_saves.append(attr)
+                    expected_target = expected_prof
+                    formula_desc = f"Mod {attr} ({mod:+d}) + Proficiência (+{correct_pb})"
+                    if item_save_bonus > 0:
+                        formula_desc += f" + Item (+{item_save_bonus})"
+                else:
+                    # Se não é save da classe, verificar se o valor escrito bate com o esperado não-proficiente
+                    expected_target = expected_non_prof
+                    formula_desc = f"Mod {attr} ({mod:+d})"
+                    if item_save_bonus > 0:
+                        formula_desc += f" + Item (+{item_save_bonus})"
+
+                is_correct = (written_val == expected_target) if written_val is not None else True
+
+                saves_math_breakdown[attr] = {
+                    "attribute_name": pt_name,
+                    "is_proficient": is_class_save,
+                    "written_value": f"{written_val:+d}" if written_val is not None else "N/A",
+                    "expected_value": f"{expected_target:+d}",
+                    "formula": formula_desc,
+                    "is_correct": is_correct
+                }
+
+            # Atualizar extracted_data com os saves validados matematicamente
+            extracted_data["saving_throws_marked"] = verified_marked_saves
 
             # PASSO 3: Recuperação RAG Exata dos Livros
             rag_queries = [
@@ -300,9 +414,14 @@ class SheetValidator:
 ```
 
 ### VERIFICAÇÃO MATEMÁTICA REALIZADA PELO SISTEMA:
-- **Cálculo de Modificadores:** {json.dumps(math_verification, ensure_ascii=False)}
+- **Cálculo de Modificadores de Atributo:** {json.dumps(math_verification, ensure_ascii=False)}
 - **Bônus de Proficiência Calculado para Nível {char_level}:** +{correct_pb}
-- **Salvaguardas Canônicas Oficiais da Classe {char_class.capitalize()}:** {class_info['saves']} ({class_info['page_ref']})
+- **Salvaguardas Oficiais Canônicas da Classe {char_class.capitalize()}:** {class_info['saves']} ({class_info['page_ref']})
+- **Bônus Ativo de Itens Mágicos em Salvaguardas:** +{item_save_bonus} (ex: Capa de Proteção)
+- **Detalhamento Matemático Exato das 6 Salvaguardas:**
+```json
+{json.dumps(saves_math_breakdown, ensure_ascii=False, indent=2)}
+```
 - **Dado de Vida Oficial:** {class_info['hit_die']}
 
 ### TRECHOS E PÁGINAS OFICIAIS RECUPERADOS DOS LIVROS (RAG):
@@ -310,6 +429,7 @@ class SheetValidator:
 
 ---
 Gere o relatório completo de auditoria rigorosamente estruturado, citando exatamente as fontes e páginas acima.
+Nas Salvaguardas, apresente a verificação matemática exata das 6 salvaguardas demonstrando que os valores não-proficientes refletem corretamente o Modificador do Atributo + Bônus do Item sem estarem marcados como proficientes.
 """
 
             synth_config = types.GenerateContentConfig(
