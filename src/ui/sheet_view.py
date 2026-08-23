@@ -105,9 +105,25 @@ def render_sheet_auditor_tab(agent, username: Optional[str] = None):
         has_issues = audit_data.get("has_issues", False)
         badge = "⚠️ Ajustes Recomendados" if has_issues else "✅ Ficha Válida"
 
-        # Cabeçalho Elegante da Ficha Ativa
-        st.markdown(f"### 🛡️ **{char_name}** — *{class_lvl}*")
-        st.caption(f"📁 Arquivo: `{audit_data.get('filename')}` | 📅 Auditada em: {created_date} | Status: **{badge}**")
+        # Cabeçalho Elegante da Ficha Ativa com Botão de Exportar PDF
+        col_hdr_info, col_hdr_btn = st.columns([3, 1])
+        with col_hdr_info:
+            st.markdown(f"### 🛡️ **{char_name}** — *{class_lvl}*")
+            st.caption(f"📁 Arquivo: `{audit_data.get('filename')}` | 📅 Auditada em: {created_date} | Status: **{badge}**")
+        with col_hdr_btn:
+            try:
+                from ..tools.pdf_exporter import generate_sheet_pdf
+                pdf_bytes = generate_sheet_pdf(audit_data)
+                safe_name = "".join(c for c in char_name if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
+                st.download_button(
+                    label="📄 **Baixar PDF**",
+                    data=pdf_bytes,
+                    file_name=f"Ficha_{safe_name}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+            except Exception as e:
+                st.caption(f"⚠️ Erro ao gerar PDF: {e}")
         st.divider()
 
         # Renderizar fluxo de conversa contínua da ficha (Iniciando com o Relatório de Auditoria completo)
