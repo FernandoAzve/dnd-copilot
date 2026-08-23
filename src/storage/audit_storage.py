@@ -60,7 +60,7 @@ def save_audit(
     initial_messages = [
         {
             "role": "model",
-            "content": f"📋 **Relatório de Auditoria da Ficha Gerado:**\n\n{report}",
+            "content": report,
             "created_at": now_iso
         }
     ]

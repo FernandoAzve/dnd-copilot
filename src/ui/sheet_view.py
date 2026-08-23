@@ -177,19 +177,15 @@ def render_sheet_auditor_tab(agent, username: Optional[str] = None):
             # Cabeçalho da Ficha Selecionada
             st.markdown(f"### 🛡️ **{char_name}** — *{class_lvl}*")
             st.caption(f"📁 Arquivo: `{audit_data.get('filename')}` | 📅 Auditada em: {created_date} | Status: **{badge}**")
-
-            with st.expander("📄 **Clique aqui para ver o Relatório Completo de Auditoria**", expanded=False):
-                st.markdown(audit_data.get("report", "Sem relatório disponível."))
-
             st.divider()
-            st.markdown(f"##### 💬 **Conversa Contínua sobre {char_name}:**")
-            st.caption("Pergunte qualquer dúvida de regras, magias, perícias, cálculos de dano ou evolução de nível deste personagem.")
 
-            # Renderizar histórico de mensagens da conversa desta ficha
+            # Renderizar fluxo de conversa contínua da ficha (Iniciando com o Relatório de Auditoria completo)
             messages = audit_data.get("messages", [])
-            for idx, msg in enumerate(messages):
-                if idx == 0 and "Relatório de Auditoria" in msg.get("content", ""):
-                    continue
+            if not messages and audit_data.get("report"):
+                # Fallback para registros legados
+                messages = [{"role": "model", "content": audit_data["report"]}]
+
+            for msg in messages:
                 render_chat_message(role=msg["role"], content=msg["content"])
 
             # Input de chat exclusivo desta ficha
