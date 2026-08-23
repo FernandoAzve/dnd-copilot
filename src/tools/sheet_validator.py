@@ -1,12 +1,20 @@
 import os
 import json
 import re
+import time
 from typing import Dict, Any, Optional, List, Union
 from PIL import Image
 import io
 
 from ..rag.vector_store import DnDKnowledgeBase
 from .character_calc import calculate_ability_modifier, calculate_proficiency_bonus
+
+MODEL_FALLBACK_CHAIN = [
+    "gemini-3.6-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro"
+]
 
 CLASS_CANONICAL_DATA = {
     "barbaro": {"saves": ["Força", "Constituição"], "hit_die": "d12", "spell_attr": None, "page_ref": "Cap. 3: Classes > Bárbaro (Pág. 51)"},
@@ -86,93 +94,115 @@ Gere o relatório exatamente nesta estrutura Markdown:
 ### 📊 2. Matriz de Auditoria de Atributos (Checklist Obrigatório)
 | Atributo | Valor Ficha | Mod. na Ficha | Mod. Correto pela Regra | Status | Fonte Oficial |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **FOR** (Força) | [Val] | [Mod Ficha] | [Mod Correto] | [✅ Correto / ❌ Incorreto] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
-| **DES** (Destreza) | [Val] | [Mod Ficha] | [Mod Correto] | [✅ Correto / ❌ Incorreto] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
-| **CON** (Constituição) | [Val] | [Mod Ficha] | [Mod Correto] | [✅ Correto / ❌ Incorreto] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
-| **INT** (Inteligência) | [Val] | [Mod Ficha] | [Mod Correto] | [✅ Correto / ❌ Incorreto] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
-| **SAB** (Sabedoria) | [Val] | [Mod Ficha] | [Mod Correto] | [✅ Correto / ❌ Incorreto] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
-| **CAR** (Carisma) | [Val] | [Mod Ficha] | [Mod Correto] | [✅ Correto / ❌ Incorreto] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
+| **FOR** (Força) | [Score] | [Mod Ficha] | [Mod Real] | [Status] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
+| **DES** (Destreza) | [Score] | [Mod Ficha] | [Mod Real] | [Status] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
+| **CON** (Constituição) | [Score] | [Mod Ficha] | [Mod Real] | [Status] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
+| **INT** (Inteligência) | [Score] | [Mod Ficha] | [Mod Real] | [Status] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
+| **SAB** (Sabedoria) | [Score] | [Mod Ficha] | [Mod Real] | [Status] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
+| **CAR** (Carisma) | [Score] | [Mod Ficha] | [Mod Real] | [Status] | *Livro do Jogador 2024, Cap. 1, pág. 15* |
 
 ---
 
 ### 🛡️ 3. Auditoria de Salvaguardas & Perícias
-- **Salvaguardas Oficiais da Classe:** [Salvaguarda 1] e [Salvaguarda 2] *(Fonte: [Citação do Livro e Página])*
-- **Itens / Efeitos Ativos:** [Ex: Capa de Proteção, etc. se houver]
-- **Status das Salvaguardas:** [Detalhamento de cada salvaguarda com a soma `Mod + Prof + Bônus de Itens`]
-- **Perícias Marcadas:** [Verificação matemática de cada perícia: `Mod + Prof (+ Prof se Expertise)`]
-- **Percepção Passiva:** Anotado [X] | Correto: `10 + Mod SAB (+ Prof se proficiente)` = **[Y]** *(Fonte: Livro do Jogador 2024, Cap. 1, pág. 10)*
+- **Salvaguardas Oficiais da Classe:** [Listar salvaguardas canônicas e conferir se estão marcadas] *(Fonte: [Livro e Página])*
+- **Itens / Efeitos Ativos:** [Ex: Capa de Proteção (+1 CA e Salvaguardas), etc.]
+- **Status das Salvaguardas:** [Detalhamento de cada salvaguarda com cálculos]
+- **Perícias Marcadas:** [Listar perícias marcadas e cálculo de Modificador + Proficiência]
+- **Percepção Passiva:** Anotado [X] | Correto: [10 + Sabedoria + Proficiência se aplicável] *(Status | Fonte: Livro do Jogador 2024, Cap. 1, pág. 10)*
 
 ---
 
 ### ⚔️ 4. Combate, Defesas, Vida & Armas
-- **Classe de Armadura (CA):** Anotado [X] | Cálculo Oficial: [Equipamento + Mod DES + Escudo + Itens] = **[Y]** *(Fonte: Livro do Jogador 2024, Cap. 6, pág. 219)*
-- **Pontos de Vida (PV Máximo):** Anotado [X] | Estimativa Oficial: [Dado de Vida + CON por nível] *(Fonte: Livro do Jogador 2024, Cap. 1, pág. 27)*
-- **Ataques com Armas:** [Verificação do Bônus de Ataque `Mod + Prof + Mágico` e Dano `Dado + Mod`]
+- **Classe de Armadura (CA):** Anotado [X] | Cálculo Oficial: [Fórmula com armadura/escudo/itens] *(Status | Fonte: [Página da Armadura])*
+- **Pontos de Vida (PV Máximo):** Anotado [X] | Estimativa Oficial (Média para Nível [X] com CON [Mod]): [Cálculo da Média] *(Fonte: Livro do Jogador 2024)*
+- **Ataques com Armas:** [Detalhamento de bônus de acerto e dano para cada arma]
 
 ---
 
 ### 🔮 5. Magias e Conjuração *(se aplicável)*
-- **Atributo de Conjuração:** [Atributo]
-- **CD de Salvaguarda de Magia:** `8 + Prof + Mod` = **[Valor]** *(Fonte: Livro do Jogador 2024, Cap. 7, pág. 236)*
-- **Bônus de Ataque Mágico:** `Prof + Mod` = **[Valor]** *(Fonte: Livro do Jogador 2024, Cap. 7, pág. 236)*
+- **Atributo de Conjuração:** [Atributo ou N/A]
+- **CD de Salvaguarda de Magia:** [8 + Prof + Mod Atributo] *(Fonte: Livro do Jogador 2024)*
+- **Bônus de Ataque Mágico:** [Prof + Mod Atributo]
 
 ---
 
 ### ⚠️ 6. Inconsistências Encontradas & Correções Exatas
-*(Liste de forma clara cada divergência com a explicação matemática, regra e valor corrigido. Se não houver divergências, afirme que a ficha está 100% correta).*
+[Enumere claramente cada erro matemático ou de regra e forneça a correção exata]
 
 ---
 
 ### 💡 7. Lembretes Oficiais, Talentos & Habilidades da Classe
-*(Liste as habilidades chave da classe para o nível do personagem e talentos do antecedente com as referências dos livros).*
+[Liste os talentos e habilidades oficiais da classe e antecedente com suas páginas e regras de 2024]
 """
 
 STRICT_AUDITOR_SYSTEM_PROMPT = STRICT_SYNTHESIS_PROMPT
 SHEET_AUDITOR_PROMPT = STRICT_SYNTHESIS_PROMPT
 
 class SheetValidator:
-    """Validador de fichas com arquitetura em dois passos (Visão + RAG + Verificação Determinística)."""
+    """Validador de fichas com arquitetura de 3 etapas: Visão -> Python Math -> Grounded RAG."""
 
     def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.6-flash"):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
         self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
         self.kb = DnDKnowledgeBase()
+        self.client = None
         self._init_client()
 
     def _init_client(self):
-        self.client = None
         if self.api_key:
             try:
                 from google import genai
                 self.client = genai.Client(api_key=self.api_key)
             except Exception as e:
-                print(f"Erro ao inicializar cliente para validação de ficha: {e}")
+                print(f"Erro ao inicializar Google GenAI Client no validador: {e}")
 
-    def update_config(self, api_key: Optional[str] = None, model_name: Optional[str] = None):
-        if api_key is not None:
-            self.api_key = api_key
-            self._init_client()
-        if model_name is not None:
-            self.model_name = model_name
+    def _generate_with_retry_and_fallback(self, contents: list, config: Any) -> Any:
+        """Gera conteúdo com retentativas automáticas e cascata de contingência de modelos."""
+        models_to_try = [self.model_name]
+        for m in MODEL_FALLBACK_CHAIN:
+            if m not in models_to_try:
+                models_to_try.append(m)
 
-    def validate_sheet_file(self, file_bytes: bytes, filename: str, mime_type: str, notes: str = "") -> Dict[str, Any]:
-        """
-        Analisa e valida uma ficha combinando extração visual, RAG de regras dos livros e validação matemática.
-        """
+        last_error = None
+        for model_candidate in models_to_try:
+            for attempt in range(2):
+                try:
+                    resp = self.client.models.generate_content(
+                        model=model_candidate,
+                        contents=contents,
+                        config=config
+                    )
+                    return resp
+                except Exception as err:
+                    last_error = err
+                    err_str = str(err)
+                    is_transient = "503" in err_str or "429" in err_str or "UNAVAILABLE" in err_str or "RESOURCE_EXHAUSTED" in err_str or "high demand" in err_str
+                    if is_transient:
+                        time.sleep(0.8 * (attempt + 1))
+                    else:
+                        break
+        raise last_error or Exception("Falha ao consultar modelos do Gemini.")
+
+    def validate_sheet_file(
+        self,
+        file_bytes: bytes,
+        filename: str,
+        mime_type: Optional[str] = None,
+        notes: str = ""
+    ) -> Dict[str, Any]:
+        """Executa a auditoria determinística completa em 3 passos com tolerância a falhas transitórias."""
         if not self.client:
             return {
                 "success": False,
-                "report": (
-                    "⚠️ **Chave de API do Gemini não configurada.**\n\n"
-                    "Por favor insira sua `GEMINI_API_KEY` na barra lateral à esquerda para realizar a auditoria de fichas."
-                ),
+                "report": "⚠️ Chave de API do Gemini (GEMINI_API_KEY) não configurada. Insira sua chave na barra lateral para auditar a ficha.",
+                "filename": filename,
                 "extracted_data": {}
             }
 
         try:
             from google.genai import types
 
-            # 1. Determinar tipo MIME
+            # Inferência de MIME type se necessário
             ext = os.path.splitext(filename)[1].lower()
             if ext == ".pdf":
                 inferred_mime = "application/pdf"
@@ -187,18 +217,19 @@ class SheetValidator:
 
             file_part = types.Part.from_bytes(data=file_bytes, mime_type=inferred_mime)
 
-            # PASSO 1: Extração estruturada com Visão do Gemini
+            # PASSO 1: Extração estruturada com Visão do Gemini (com retry e fallback)
             extract_prompt = EXTRACTION_PROMPT
             if notes.strip():
                 extract_prompt += f"\n\nObservações extras: {notes}"
 
-            extract_resp = self.client.models.generate_content(
-                model=self.model_name,
+            extract_config = types.GenerateContentConfig(
+                temperature=0.0,
+                top_p=1.0
+            )
+
+            extract_resp = self._generate_with_retry_and_fallback(
                 contents=[file_part, extract_prompt],
-                config=types.GenerateContentConfig(
-                    temperature=0.0,
-                    top_p=1.0
-                )
+                config=extract_config
             )
 
             raw_json = extract_resp.text or "{}"
@@ -260,7 +291,7 @@ class SheetValidator:
 
             rag_grounding_text = "\n\n---\n\n".join(rag_context_blocks[:4])
 
-            # PASSO 4: Síntese Grounded Determinística com Citações Oficiais
+            # PASSO 4: Síntese Grounded Determinística com Citações Oficiais (com retry e fallback)
             synthesis_input = f"""
 ### DADOS EXTRAÍDOS DA FICHA DO JOGADOR:
 ```json
@@ -280,14 +311,15 @@ class SheetValidator:
 Gere o relatório completo de auditoria rigorosamente estruturado, citando exatamente as fontes e páginas acima.
 """
 
-            synth_resp = self.client.models.generate_content(
-                model=self.model_name,
+            synth_config = types.GenerateContentConfig(
+                system_instruction=STRICT_SYNTHESIS_PROMPT,
+                temperature=0.0,
+                top_p=1.0
+            )
+
+            synth_resp = self._generate_with_retry_and_fallback(
                 contents=[synthesis_input],
-                config=types.GenerateContentConfig(
-                    system_instruction=STRICT_SYNTHESIS_PROMPT,
-                    temperature=0.0,
-                    top_p=1.0
-                )
+                config=synth_config
             )
 
             report_text = synth_resp.text or "Relatório de auditoria gerado."

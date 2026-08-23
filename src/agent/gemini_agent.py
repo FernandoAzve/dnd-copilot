@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
@@ -16,6 +17,14 @@ from ..rag.vector_store import DnDKnowledgeBase
 from .prompts import get_system_prompt
 
 load_dotenv()
+
+# Ordem de contingência de modelos caso o Google esteja sob alta demanda (503 / 429)
+MODEL_FALLBACK_CHAIN = [
+    "gemini-3.6-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro"
+]
 
 # Definições de ferramentas para o Google Gemini
 def tool_roll_dice(formula: str = "1d20", advantage: bool = False, disadvantage: bool = False, reason: str = "") -> str:
@@ -64,7 +73,7 @@ TOOLS_MAP = {
 }
 
 class DnDAgent:
-    """Agente especialista em D&D que integra Gemini (Chat AFC), RAG e Ferramentas de Jogo."""
+    """Agente especialista em D&D que integra Gemini (Chat AFC com retry automático e redundância de modelos), RAG e Ferramentas."""
 
     def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.6-flash", mode: str = "mentor"):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
@@ -104,8 +113,8 @@ class DnDAgent:
         self.history = []
         self.chat_session = None
 
-    def _get_or_create_chat(self, system_instruction: str):
-        """Cria ou recupera a sessão de Chat com Automatic Function Calling (AFC)."""
+    def _create_chat_session(self, model_name: str, system_instruction: str):
+        """Cria a sessão de Chat com Automatic Function Calling (AFC) para o modelo especificado."""
         from google.genai import types
 
         tools_list = [
@@ -125,12 +134,12 @@ class DnDAgent:
         )
 
         return self.client.chats.create(
-            model=self.model_name,
+            model=model_name,
             config=config
         )
 
     def answer_query(self, user_message: str) -> Dict[str, Any]:
-        """Processa a mensagem do usuário via Chat com AFC do Google Gemini."""
+        """Processa a mensagem do usuário via Chat com AFC, retentativas e cascata de contingência automática."""
         # 1. Recuperar contexto do RAG
         rag_results = self.kb.search(user_message, top_k=3)
         rag_context = ""
@@ -149,35 +158,59 @@ class DnDAgent:
         if not self.client:
             return self._offline_fallback_response(user_message, rag_results)
 
-        try:
-            # Criar ou atualizar a sessão de chat com as instruções atuais
-            chat = self._get_or_create_chat(system_instruction)
-            
-            # Executar envio da mensagem via Chat.send_message (Usa Automatic Function Calling nativo e sem avisos)
-            response = chat.send_message(user_message)
-            
-            final_text = response.text or "Sem resposta textual."
+        # Montar cadeia de modelos: Começa com o modelo escolhido e inclui os de redundância
+        models_to_try = [self.model_name]
+        for m in MODEL_FALLBACK_CHAIN:
+            if m not in models_to_try:
+                models_to_try.append(m)
 
-            # Salvar no histórico
-            self.history.append({"role": "user", "content": user_message})
-            self.history.append({"role": "model", "content": final_text})
+        last_error = None
 
-            return {
-                "text": final_text,
-                "tool_logs": tool_logs,
-                "rag_results": rag_results
-            }
+        # Executar tentativa com retry e cascata de modelos em caso de 503 / 429
+        for model_candidate in models_to_try:
+            for attempt in range(2):  # Até 2 tentativas por modelo com backoff
+                try:
+                    chat = self._create_chat_session(model_candidate, system_instruction)
+                    response = chat.send_message(user_message)
+                    final_text = response.text or "Sem resposta textual."
 
-        except Exception as e:
-            return {
-                "text": f"⚠️ Erro ao consultar o modelo Gemini: {str(e)}\n\n*Alternativa local utilizada para responder com a base de regras:*",
-                "tool_logs": tool_logs,
-                "rag_results": rag_results,
-                "fallback": self._offline_fallback_response(user_message, rag_results)["text"]
-            }
+                    # Salvar no histórico
+                    self.history.append({"role": "user", "content": user_message})
+                    self.history.append({"role": "model", "content": final_text})
+
+                    return {
+                        "text": final_text,
+                        "tool_logs": tool_logs,
+                        "rag_results": rag_results,
+                        "model_used": model_candidate
+                    }
+
+                except Exception as err:
+                    err_str = str(err)
+                    last_error = err_str
+                    # Se for erro de alta demanda (503) ou rate limit (429), aguardar brevemente antes do retry/fallback
+                    is_transient = "503" in err_str or "429" in err_str or "UNAVAILABLE" in err_str or "RESOURCE_EXHAUSTED" in err_str or "high demand" in err_str
+                    if is_transient:
+                        time.sleep(0.8 * (attempt + 1))
+                    else:
+                        # Erro não transitório no modelo, pular para o próximo candidato
+                        break
+
+        # Se todos os modelos da cascata falharem após retentativas
+        fallback_data = self._offline_fallback_response(user_message, rag_results)
+        error_notice = (
+            "⚠️ **Os servidores do Google Gemini estão sob alta demanda temporária neste momento.**\n\n"
+            "*O Grimório ativou a base local de regras para responder à sua dúvida:*\n\n"
+        )
+        return {
+            "text": error_notice + fallback_data["text"],
+            "tool_logs": tool_logs,
+            "rag_results": rag_results,
+            "error_details": last_error
+        }
 
     def _offline_fallback_response(self, user_message: str, rag_results: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Modo de contingência sem API Key: responde usando as ferramentas locais e o motor RAG."""
+        """Modo de contingência sem API Key ou durante indisponibilidade total da nuvem."""
         tool_logs = []
         msg_lower = user_message.lower()
 
@@ -190,28 +223,25 @@ class DnDAgent:
             is_disadv = "desvantagem" in msg_lower
             res = roll_dice(formula=formula, advantage=is_adv, disadvantage=is_disadv)
             tool_logs.append({"tool": "roll_dice", "result": json.dumps(res, ensure_ascii=False)})
-            text = f"🎲 **Rolagem Efetuada:**\n{res['breakdown']}\n\n*(Configure sua chave GEMINI_API_KEY na barra lateral para habilitar a inteligência completa do agente!)*"
+            text = f"🎲 **Rolagem Efetuada:**\n{res['breakdown']}"
             return {"text": text, "tool_logs": tool_logs, "rag_results": rag_results}
 
         # Checar se encontrou regras no RAG
         if rag_results:
             top_match = rag_results[0]
             text = (
-                f"### 🧙‍♂️ Resposta do Grimório (Modo Offline):\n\n"
-                f"Encontrei uma correspondência na base de regras oficial:\n\n"
+                f"### 📖 Consulta Direta às Regras Oficiais:\n\n"
                 f"**{top_match['title']}** ({top_match['category']})\n\n"
                 f"{top_match['content']}\n\n"
-                f"---\n💡 *Para conversas dinâmicas, análises de personagens e explicações didáticas completas, insira sua GEMINI_API_KEY no painel lateral.*"
+                f"---\n💡 *Dica: Você pode tentar reenviar sua pergunta em alguns instantes assim que a alta demanda no Google se normalizar.*"
             )
             return {"text": text, "tool_logs": tool_logs, "rag_results": rag_results}
 
         return {
             "text": (
-                "👋 **Bem-vindo ao Grimório do D&D!**\n\n"
-                "Para desbloquear todo o poder do agente com explicações inteligentes, raciocínio tático e mentoria para novatos, "
-                "por favor adicione sua **Chave de API do Google Gemini** no menu lateral à esquerda.\n\n"
-                "Você pode obter uma chave gratuita no [Google AI Studio](https://aistudio.google.com/app/apikey).\n\n"
-                "Enquanto isso, você já pode usar o **Rolador de Dados** e a consulta rápida de regras e condições na barra lateral!"
+                "👋 **Grimório do D&D**\n\n"
+                "Os servidores do Google Gemini estão com oscilação temporária de tráfego. "
+                "Enquanto isso, você pode utilizar o **Rolador de Dados** e a consulta de regras e condições na barra lateral!"
             ),
             "tool_logs": tool_logs,
             "rag_results": rag_results
