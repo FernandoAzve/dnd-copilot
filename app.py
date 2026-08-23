@@ -10,6 +10,8 @@ from src.ui.styles import apply_custom_styles
 from src.ui.components import render_sidebar, render_chat_message
 from src.ui.sheet_view import render_sheet_auditor_tab
 from src.auth.auth_ui import render_auth_page
+from src.auth.security import validate_session_token
+from src.auth.user_manager import get_user_profile
 from src.storage.chat_storage import (
     create_session,
     save_session,
@@ -25,10 +27,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Aplicar estilos visuais customizados
-apply_custom_styles()
+# Gerenciamento de Tema (Modo Claro vs Modo Escuro)
+theme_param = st.query_params.get("theme")
+if "theme_mode" not in st.session_state:
+    st.session_state["theme_mode"] = theme_param if theme_param in ["light", "dark"] else "dark"
+theme_mode = st.session_state["theme_mode"]
 
-# 1. VERIFICAÇÃO DE AUTENTICAÇÃO (AUTH GATE)
+# Aplicar estilos visuais customizados
+apply_custom_styles(theme_mode)
+
+# 1. VERIFICAÇÃO DE AUTENTICAÇÃO COM PERSISTÊNCIA (AUTH GATE + SESSION TOKEN)
+if "authenticated_user" not in st.session_state or not st.session_state["authenticated_user"]:
+    token = st.query_params.get("session_token")
+    if token:
+        valid_user = validate_session_token(token)
+        if valid_user:
+            profile = get_user_profile(valid_user)
+            if profile:
+                st.session_state["authenticated_user"] = profile
+
 if "authenticated_user" not in st.session_state or not st.session_state["authenticated_user"]:
     render_auth_page()
     st.stop()

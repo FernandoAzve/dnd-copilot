@@ -5,7 +5,9 @@ from src.auth.security import (
     hash_password,
     verify_password,
     encrypt_api_key,
-    decrypt_api_key
+    decrypt_api_key,
+    create_session_token,
+    validate_session_token
 )
 from src.auth.user_manager import (
     register_user,
@@ -49,6 +51,14 @@ def test_cryptography_hashing_and_encryption():
     assert len(encrypted) > len(raw_key)
     decrypted = decrypt_api_key(encrypted)
     assert decrypted == raw_key
+
+    # 3. Teste de Token de Sessão Assinado para Persistência
+    test_user = "fernando_persist_test"
+    token = create_session_token(test_user)
+    assert token != test_user
+    validated_user = validate_session_token(token)
+    assert validated_user == test_user
+    assert validate_session_token("invalid_token_xyz") is None
 
 def test_user_registration_and_rbac(temp_test_db):
     test_user_admin = "mestre_unit_test"

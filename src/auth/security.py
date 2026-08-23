@@ -3,7 +3,8 @@ import secrets
 import hashlib
 import hmac
 import base64
-from typing import Tuple
+import time
+from typing import Tuple, Optional
 from cryptography.fernet import Fernet
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -86,3 +87,25 @@ def decrypt_api_key(encrypted_key: str) -> str:
     except Exception as e:
         print(f"Erro ao descriptografar chave: {e}")
         return ""
+
+def create_session_token(username: str) -> str:
+    """Gera um token de sessão assinado e criptografado com AES-256 para persistência no navegador."""
+    clean_user = username.strip().lower()
+    payload = f"{clean_user}:{int(time.time())}"
+    cipher = Fernet(_get_or_create_app_secret())
+    return cipher.encrypt(payload.encode("utf-8")).decode("utf-8")
+
+def validate_session_token(token: str, max_age_days: int = 14) -> Optional[str]:
+    """Valida o token de sessão e retorna o username se for válido e não expirado."""
+    if not token or not token.strip():
+        return None
+    try:
+        cipher = Fernet(_get_or_create_app_secret())
+        decrypted = cipher.decrypt(token.strip().encode("utf-8")).decode("utf-8")
+        username, timestamp_str = decrypted.split(":", 1)
+        timestamp = int(timestamp_str)
+        if time.time() - timestamp > (max_age_days * 86400):
+            return None
+        return username
+    except Exception:
+        return None

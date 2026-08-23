@@ -2,7 +2,9 @@ from .security import (
     hash_password,
     verify_password,
     encrypt_api_key,
-    decrypt_api_key
+    decrypt_api_key,
+    create_session_token,
+    validate_session_token
 )
 from .user_manager import (
     register_user,
@@ -18,6 +20,8 @@ __all__ = [
     "verify_password",
     "encrypt_api_key",
     "decrypt_api_key",
+    "create_session_token",
+    "validate_session_token",
     "register_user",
     "authenticate_user",
     "update_user_api_key",

@@ -6,9 +6,10 @@ from .user_manager import (
     update_user_api_key,
     count_users
 )
+from .security import create_session_token
 
 def render_auth_page():
-    """Renderiza a página temática de login e cadastro."""
+    """Renderiza a página temática de login e cadastro com persistência de sessão."""
     col_center1, col_center2, col_center3 = st.columns([1, 2, 1])
     
     with col_center2:
@@ -16,7 +17,7 @@ def render_auth_page():
         st.markdown(
             "<div style='text-align: center;'>"
             "<h1>🐉 Grimório do Mestre & D&D Copilot</h1>"
-            "<p style='color: #d4af37; font-size: 1.1em;'>Seu assistente de regras 5e/2024, mentor e validador de fichas</p>"
+            "<p style='color: #c99a4e; font-size: 1.1em;'>Seu assistente de regras 5e/2024, mentor e validador de fichas</p>"
             "</div>",
             unsafe_allow_html=True
         )
@@ -43,6 +44,8 @@ def render_auth_page():
                     else:
                         success, user_data, msg = authenticate_user(login_user, login_pass)
                         if success and user_data:
+                            token = create_session_token(login_user)
+                            st.query_params["session_token"] = token
                             st.session_state["authenticated_user"] = user_data
                             st.session_state["current_session_id"] = None
                             st.session_state["selected_audit_id"] = None
@@ -104,7 +107,7 @@ def render_auth_page():
                             st.error(msg)
 
 def render_user_profile_sidebar(user_data: Dict[str, Any], agent):
-    """Renderiza os dados do usuário logado na barra lateral com opções de logout e alteração de chave."""
+    """Renderiza os dados do usuário logado na barra lateral com alternador de tema e logout."""
     st.sidebar.markdown("---")
     
     user_name = user_data.get("name") or user_data.get("username", "Aventureiro")
@@ -113,6 +116,19 @@ def render_user_profile_sidebar(user_data: Dict[str, Any], agent):
     
     st.sidebar.markdown(f"👤 **{user_name}**")
     st.sidebar.caption(f"Perfil: **{badge}**")
+
+    # Alternador de Tema de Visualização (Modo Claro vs Modo Escuro)
+    curr_theme = st.session_state.get("theme_mode", "dark")
+    if curr_theme == "dark":
+        if st.sidebar.button("☀️ **Modo Claro (Pergaminho)**", key="btn_toggle_theme", use_container_width=True):
+            st.session_state["theme_mode"] = "light"
+            st.query_params["theme"] = "light"
+            st.rerun()
+    else:
+        if st.sidebar.button("🌙 **Modo Escuro (Grimório)**", key="btn_toggle_theme", use_container_width=True):
+            st.session_state["theme_mode"] = "dark"
+            st.query_params["theme"] = "dark"
+            st.rerun()
 
     with st.sidebar.expander("🔑 **Minha Chave Gemini**", expanded=not bool(user_data.get("gemini_api_key"))):
         curr_key = user_data.get("gemini_api_key", "")
@@ -133,5 +149,6 @@ def render_user_profile_sidebar(user_data: Dict[str, Any], agent):
                 st.rerun()
 
     if st.sidebar.button("🚪 **Sair (Logout)**", use_container_width=True, type="secondary"):
+        st.query_params.clear()
         st.session_state.clear()
         st.rerun()
