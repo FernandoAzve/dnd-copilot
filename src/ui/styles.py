@@ -3,7 +3,7 @@ import streamlit as st
 def apply_custom_styles(theme_mode: str = "dark"):
     """
     Aplica estilo visual temático de RPG com suporte a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), garantindo contraste absoluto em todos os elementos.
+    e Modo Claro (Pergaminho Arcano), garantindo que header, footer e inputs sigam o tema perfeitamente.
     """
     is_light = (theme_mode == "light")
 
@@ -47,6 +47,26 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #1c1813 !important;
         }
 
+        /* Top Header e Bottom Toolbar do Streamlit */
+        header[data-testid="stHeader"], .stAppHeader {
+            background-color: var(--app-bg) !important;
+            color: #1c1813 !important;
+        }
+
+        header[data-testid="stHeader"] * {
+            color: #1c1813 !important;
+        }
+
+        [data-testid="stDecoration"] {
+            background-image: linear-gradient(90deg, #cfc1a5, #8a5d14, #cfc1a5) !important;
+        }
+
+        [data-testid="stBottom"], [data-testid="stBottomBlockContainer"], footer {
+            background-color: var(--app-bg) !important;
+            color: #4e4436 !important;
+        }
+
+        /* Barra lateral */
         section[data-testid="stSidebar"] {
             background-color: var(--sidebar-bg) !important;
             border-right: 1px solid var(--border-color) !important;
@@ -80,6 +100,22 @@ def apply_custom_styles(theme_mode: str = "dark"):
             margin-bottom: 12px;
             color: #1c1813 !important;
             box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+
+        /* Chat Input */
+        div[data-testid="stChatInput"] {
+            background-color: var(--app-bg) !important;
+        }
+
+        div[data-testid="stChatInput"] textarea {
+            background-color: #ffffff !important;
+            color: #1c1813 !important;
+            border: 1px solid #c4b595 !important;
+            border-radius: 8px !important;
+        }
+
+        div[data-testid="stChatInput"] button {
+            color: #8a5d14 !important;
         }
 
         /* Tabelas */
@@ -255,6 +291,26 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #e8e3d9 !important;
         }
 
+        /* Top Header e Bottom Toolbar do Streamlit */
+        header[data-testid="stHeader"], .stAppHeader {
+            background-color: var(--app-bg) !important;
+            color: #e8e3d9 !important;
+        }
+
+        header[data-testid="stHeader"] * {
+            color: #e8e3d9 !important;
+        }
+
+        [data-testid="stDecoration"] {
+            background-image: linear-gradient(90deg, #3d3424, #c99a4e, #3d3424) !important;
+        }
+
+        [data-testid="stBottom"], [data-testid="stBottomBlockContainer"], footer {
+            background-color: var(--app-bg) !important;
+            color: #a09a8f !important;
+        }
+
+        /* Barra lateral */
         section[data-testid="stSidebar"] {
             background-color: var(--sidebar-bg) !important;
             border-right: 1px solid var(--border-color) !important;
@@ -287,6 +343,22 @@ def apply_custom_styles(theme_mode: str = "dark"):
             border-radius: 8px;
             margin-bottom: 12px;
             color: #e8e3d9 !important;
+        }
+
+        /* Chat Input */
+        div[data-testid="stChatInput"] {
+            background-color: var(--app-bg) !important;
+        }
+
+        div[data-testid="stChatInput"] textarea {
+            background-color: #1a1e27 !important;
+            color: #f1ebd9 !important;
+            border: 1px solid #3d3424 !important;
+            border-radius: 8px !important;
+        }
+
+        div[data-testid="stChatInput"] button {
+            color: #e5b967 !important;
         }
 
         /* Tabelas */
