@@ -3,8 +3,7 @@ import streamlit as st
 def apply_custom_styles(theme_mode: str = "dark"):
     """
     Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), garantindo que placeholders, expanders, botões
-    e caixas de texto tenham contraste nítido e impecável.
+    e Modo Claro (Pergaminho Arcano), garantindo placeholders 100% nítidos, brilhantes e legíveis.
     """
     is_light = (theme_mode == "light")
 
@@ -120,6 +119,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #1c1813 !important;
             border: 1px solid #c4b595 !important;
             border-radius: 8px !important;
+            font-size: 0.95rem !important;
         }
 
         div[data-testid="stChatInput"] button {
@@ -135,11 +135,14 @@ def apply_custom_styles(theme_mode: str = "dark"):
         textarea::placeholder,
         input::placeholder,
         div[data-testid="stChatInput"] textarea::placeholder,
-        div[data-testid="stChatInput"] textarea::-webkit-input-placeholder {
-            color: #5a4f3d !important;
-            -webkit-text-fill-color: #5a4f3d !important;
-            opacity: 1 !important;
+        div[data-testid="stChatInput"] textarea::-webkit-input-placeholder,
+        div[data-baseweb="textarea"] textarea::placeholder,
+        div[data-baseweb="base-input"] input::placeholder {
+            color: #2b241a !important;
+            -webkit-text-fill-color: #2b241a !important;
+            opacity: 0.85 !important;
             font-weight: 500 !important;
+            font-size: 0.95rem !important;
         }
 
         /* Tabelas */
@@ -398,13 +401,14 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #ffffff !important;
             border: 1px solid #3d3424 !important;
             border-radius: 8px !important;
+            font-size: 0.95rem !important;
         }
 
         div[data-testid="stChatInput"] button {
             color: #e5b967 !important;
         }
 
-        /* Placeholders Nítidos e Fáceis de Enxergar no Modo Escuro */
+        /* Placeholders Nítidos e de Alto Contraste no Modo Escuro */
         ::placeholder,
         ::-webkit-input-placeholder,
         :-moz-placeholder,
@@ -413,11 +417,14 @@ def apply_custom_styles(theme_mode: str = "dark"):
         textarea::placeholder,
         input::placeholder,
         div[data-testid="stChatInput"] textarea::placeholder,
-        div[data-testid="stChatInput"] textarea::-webkit-input-placeholder {
-            color: #d0c8b8 !important;
-            -webkit-text-fill-color: #d0c8b8 !important;
-            opacity: 1 !important;
+        div[data-testid="stChatInput"] textarea::-webkit-input-placeholder,
+        div[data-baseweb="textarea"] textarea::placeholder,
+        div[data-baseweb="base-input"] input::placeholder {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            opacity: 0.9 !important;
             font-weight: 500 !important;
+            font-size: 0.95rem !important;
         }
 
         /* Tabelas */
