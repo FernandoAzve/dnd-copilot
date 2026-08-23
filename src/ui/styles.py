@@ -2,8 +2,9 @@ import streamlit as st
 
 def apply_custom_styles(theme_mode: str = "dark"):
     """
-    Aplica estilo visual temático de RPG com suporte a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), garantindo que header, footer e inputs sigam o tema perfeitamente.
+    Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
+    e Modo Claro (Pergaminho Arcano), garantindo que containers externos, inputs, botões
+    de formulário, placeholders e botões ativos no histórico fiquem perfeitos.
     """
     is_light = (theme_mode == "light")
 
@@ -102,9 +103,16 @@ def apply_custom_styles(theme_mode: str = "dark"):
             box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
 
-        /* Chat Input */
-        div[data-testid="stChatInput"] {
-            background-color: var(--app-bg) !important;
+        /* Chat Input e Todos os seus Wrappers BaseWeb */
+        div[data-testid="stChatInput"],
+        div[data-testid="stChatInput"] > div,
+        div[data-testid="stChatInput"] [data-baseweb="base-input"],
+        div[data-testid="stChatInput"] [data-baseweb="textarea"],
+        div[data-testid="stChatFloatingInputContainer"],
+        .stChatFloatingInputContainer {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            border-color: #c4b595 !important;
         }
 
         div[data-testid="stChatInput"] textarea {
@@ -116,6 +124,18 @@ def apply_custom_styles(theme_mode: str = "dark"):
 
         div[data-testid="stChatInput"] button {
             color: #8a5d14 !important;
+        }
+
+        /* Placeholders Nítidos */
+        ::placeholder,
+        ::-webkit-input-placeholder,
+        :-moz-placeholder,
+        ::-moz-placeholder,
+        :-ms-input-placeholder,
+        textarea::placeholder,
+        input::placeholder {
+            color: #635847 !important;
+            opacity: 1 !important;
         }
 
         /* Tabelas */
@@ -172,7 +192,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             font-weight: 600;
         }
 
-        /* Botões */
+        /* Botões Normais */
         .stButton > button {
             background: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%) !important;
             color: #1c1813 !important;
@@ -187,14 +207,32 @@ def apply_custom_styles(theme_mode: str = "dark"):
             box-shadow: 0 0 8px rgba(138, 93, 20, 0.3) !important;
         }
 
-        .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {
+        /* Botões Ativos / Desabilitados no Histórico */
+        .stButton > button:disabled,
+        .stButton > button[disabled] {
+            background: #ebd8b8 !important;
+            color: #523103 !important;
+            border: 1px solid #8a5d14 !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
+            cursor: default !important;
+        }
+
+        /* Botões Primários e Botão de Rolar Expressão do Formulário */
+        .stButton > button[kind="primary"],
+        .stButton > button[data-testid="baseButton-primary"],
+        div[data-testid="stFormSubmitButton"] button,
+        .stFormSubmitButton > button {
             background: linear-gradient(180deg, #a36f1c 0%, #7c500c 100%) !important;
             color: #ffffff !important;
             border: 1px solid #5a3804 !important;
-            font-weight: 700;
+            font-weight: 700 !important;
         }
 
-        .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {
+        .stButton > button[kind="primary"]:hover,
+        .stButton > button[data-testid="baseButton-primary"]:hover,
+        div[data-testid="stFormSubmitButton"] button:hover,
+        .stFormSubmitButton > button:hover {
             background: linear-gradient(180deg, #b87e22 0%, #8f5c10 100%) !important;
             color: #ffffff !important;
             box-shadow: 0 0 10px rgba(138, 93, 20, 0.4) !important;
@@ -345,9 +383,16 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #e8e3d9 !important;
         }
 
-        /* Chat Input */
-        div[data-testid="stChatInput"] {
-            background-color: var(--app-bg) !important;
+        /* Chat Input e Todos os seus Wrappers BaseWeb */
+        div[data-testid="stChatInput"],
+        div[data-testid="stChatInput"] > div,
+        div[data-testid="stChatInput"] [data-baseweb="base-input"],
+        div[data-testid="stChatInput"] [data-baseweb="textarea"],
+        div[data-testid="stChatFloatingInputContainer"],
+        .stChatFloatingInputContainer {
+            background-color: #1a1e27 !important;
+            background: #1a1e27 !important;
+            border-color: #3d3424 !important;
         }
 
         div[data-testid="stChatInput"] textarea {
@@ -359,6 +404,18 @@ def apply_custom_styles(theme_mode: str = "dark"):
 
         div[data-testid="stChatInput"] button {
             color: #e5b967 !important;
+        }
+
+        /* Placeholders Nítidos e Fáceis de Enxergar */
+        ::placeholder,
+        ::-webkit-input-placeholder,
+        :-moz-placeholder,
+        ::-moz-placeholder,
+        :-ms-input-placeholder,
+        textarea::placeholder,
+        input::placeholder {
+            color: #9a9488 !important;
+            opacity: 1 !important;
         }
 
         /* Tabelas */
@@ -411,7 +468,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             font-weight: 600;
         }
 
-        /* Botões */
+        /* Botões Normais */
         .stButton > button {
             background: linear-gradient(180deg, #282f3c 0%, #191e27 100%) !important;
             color: #f1ebd9 !important;
@@ -426,14 +483,32 @@ def apply_custom_styles(theme_mode: str = "dark"):
             box-shadow: 0 0 8px rgba(229, 185, 103, 0.3) !important;
         }
 
-        .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {
+        /* Botões Ativos / Desabilitados no Histórico */
+        .stButton > button:disabled,
+        .stButton > button[disabled] {
+            background: #252b36 !important;
+            color: #e5b967 !important;
+            border: 1px solid #c99a4e !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
+            cursor: default !important;
+        }
+
+        /* Botões Primários e Botão de Rolar Expressão do Formulário */
+        .stButton > button[kind="primary"],
+        .stButton > button[data-testid="baseButton-primary"],
+        div[data-testid="stFormSubmitButton"] button,
+        .stFormSubmitButton > button {
             background: linear-gradient(180deg, #c99a4e 0%, #a8792c 100%) !important;
             color: #1a1408 !important;
             border: 1px solid #7c581d !important;
-            font-weight: 700;
+            font-weight: 700 !important;
         }
 
-        .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {
+        .stButton > button[kind="primary"]:hover,
+        .stButton > button[data-testid="baseButton-primary"]:hover,
+        div[data-testid="stFormSubmitButton"] button:hover,
+        .stFormSubmitButton > button:hover {
             background: linear-gradient(180deg, #dfb15b 0%, #bd8c36 100%) !important;
             color: #000000 !important;
             box-shadow: 0 0 12px rgba(229, 185, 103, 0.5) !important;
