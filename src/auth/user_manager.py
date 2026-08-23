@@ -16,15 +16,16 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "users.db")
 USERS_DIR = os.path.join(DATA_DIR, "users")
 
-def _get_connection() -> sqlite3.Connection:
-    os.makedirs(DATA_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+def _get_connection(db_path: Optional[str] = None) -> sqlite3.Connection:
+    target_path = db_path or DB_PATH
+    os.makedirs(os.path.dirname(target_path), exist_ok=True)
+    conn = sqlite3.connect(target_path)
     conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
+def init_db(db_path: Optional[str] = None):
     """Inicializa a tabela de usuários caso não exista."""
-    conn = _get_connection()
+    conn = _get_connection(db_path)
     try:
         cursor = conn.cursor()
         cursor.execute("""
@@ -53,11 +54,18 @@ def _ensure_user_directories(username: str):
     os.makedirs(os.path.join(user_root, "chat_history"), exist_ok=True)
     os.makedirs(os.path.join(user_root, "audit_history"), exist_ok=True)
 
+def _is_env_admin(username: str) -> bool:
+    """Verifica se o usuário está listado na variável de ambiente ADMIN_USERNAMES."""
+    admin_env = os.getenv("ADMIN_USERNAMES", "")
+    admins = [u.strip().lower() for u in admin_env.split(",") if u.strip()]
+    return username.strip().lower() in admins
+
 def register_user(
     username: str,
     password: str,
     name: str = "",
-    gemini_api_key: str = ""
+    gemini_api_key: str = "",
+    db_path: Optional[str] = None
 ) -> Tuple[bool, str]:
     """
     Registra um novo usuário no sistema.
@@ -75,7 +83,7 @@ def register_user(
     if len(password) < 6:
         return False, "A senha deve ter no mínimo 6 caracteres."
 
-    conn = _get_connection()
+    conn = _get_connection(db_path)
     try:
         cursor = conn.cursor()
         
@@ -84,10 +92,10 @@ def register_user(
         if cursor.fetchone() is not None:
             return False, f"O usuário '{clean_username}' já está em uso. Escolha outro."
             
-        # Verificar se é o primeiro usuário do sistema (será Admin)
+        # Verificar se é o primeiro usuário do sistema ou se está na env ADMIN_USERNAMES
         cursor.execute("SELECT COUNT(*) as cnt FROM users")
         total_users = cursor.fetchone()["cnt"]
-        is_admin = 1 if total_users == 0 else 0
+        is_admin = 1 if (total_users == 0 or _is_env_admin(clean_username)) else 0
         
         # Criptografar senha e chave de API
         pwd_hash, salt = hash_password(password)
@@ -111,7 +119,7 @@ def register_user(
     finally:
         conn.close()
 
-def authenticate_user(username: str, password: str) -> Tuple[bool, Optional[Dict[str, Any]], str]:
+def authenticate_user(username: str, password: str, db_path: Optional[str] = None) -> Tuple[bool, Optional[Dict[str, Any]], str]:
     """
     Autentica o usuário com hash PBKDF2 e descriptografa sua chave de API em memória.
     """
@@ -119,7 +127,7 @@ def authenticate_user(username: str, password: str) -> Tuple[bool, Optional[Dict
     if not clean_username or not password:
         return False, None, "Preencha o usuário e a senha."
         
-    conn = _get_connection()
+    conn = _get_connection(db_path)
     try:
         cursor = conn.cursor()
         cursor.execute("""
@@ -141,12 +149,14 @@ def authenticate_user(username: str, password: str) -> Tuple[bool, Optional[Dict
         # Garantir diretórios privados
         _ensure_user_directories(clean_username)
         
+        is_admin_flag = bool(row["is_admin"]) or _is_env_admin(clean_username)
+        
         user_data = {
             "id": row["id"],
             "username": row["username"],
             "name": row["name"],
             "gemini_api_key": decrypted_key,
-            "is_admin": bool(row["is_admin"]),
+            "is_admin": is_admin_flag,
             "created_at": row["created_at"]
         }
         return True, user_data, "Login realizado com sucesso!"
@@ -155,12 +165,12 @@ def authenticate_user(username: str, password: str) -> Tuple[bool, Optional[Dict
     finally:
         conn.close()
 
-def update_user_api_key(username: str, new_api_key: str) -> bool:
+def update_user_api_key(username: str, new_api_key: str, db_path: Optional[str] = None) -> bool:
     """Atualiza e salva a chave de API do Gemini criptografada no banco."""
     clean_username = username.strip().lower()
     enc_key = encrypt_api_key(new_api_key)
     
-    conn = _get_connection()
+    conn = _get_connection(db_path)
     try:
         cursor = conn.cursor()
         cursor.execute("""
@@ -176,10 +186,34 @@ def update_user_api_key(username: str, new_api_key: str) -> bool:
     finally:
         conn.close()
 
-def get_user_profile(username: str) -> Optional[Dict[str, Any]]:
+def promote_to_admin(username: str, db_path: Optional[str] = None) -> bool:
+    """Promove um usuário a Administrador / Mestre."""
+    clean_username = username.strip().lower()
+    conn = _get_connection(db_path)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET is_admin = 1 WHERE username = ?", (clean_username,))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+def demote_from_admin(username: str, db_path: Optional[str] = None) -> bool:
+    """Remove privilégios de Administrador de um usuário."""
+    clean_username = username.strip().lower()
+    conn = _get_connection(db_path)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET is_admin = 0 WHERE username = ?", (clean_username,))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+def get_user_profile(username: str, db_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Obtém o perfil de um usuário."""
     clean_username = username.strip().lower()
-    conn = _get_connection()
+    conn = _get_connection(db_path)
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT id, username, name, encrypted_api_key, is_admin, created_at FROM users WHERE username = ?", (clean_username,))
@@ -191,15 +225,15 @@ def get_user_profile(username: str) -> Optional[Dict[str, Any]]:
             "username": row["username"],
             "name": row["name"],
             "gemini_api_key": decrypt_api_key(row["encrypted_api_key"]),
-            "is_admin": bool(row["is_admin"]),
+            "is_admin": bool(row["is_admin"]) or _is_env_admin(clean_username),
             "created_at": row["created_at"]
         }
     finally:
         conn.close()
 
-def count_users() -> int:
+def count_users(db_path: Optional[str] = None) -> int:
     """Retorna o total de usuários registrados."""
-    conn = _get_connection()
+    conn = _get_connection(db_path)
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) as cnt FROM users")
