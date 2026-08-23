@@ -98,23 +98,9 @@ if not st.session_state.agent.api_key:
 
 st.divider()
 
-# 5. NAVEGAÇÃO PRINCIPAL (ESTADO SEGURO)
-col_nav_main1, col_nav_main2, _ = st.columns([2, 2.5, 3.5])
-with col_nav_main1:
-    is_chat_view = (st.session_state["main_view"] == "chat")
-    if st.button("💬 **Grimório & Chat de Regras**", key="btn_main_chat", use_container_width=True, type="primary" if is_chat_view else "secondary"):
-        st.session_state["main_view"] = "chat"
-        st.rerun()
+st.divider()
 
-with col_nav_main2:
-    is_sheet_view = (st.session_state["main_view"] == "sheets")
-    if st.button("📋 **Auditor de Fichas (Fotos & PDFs)**", key="btn_main_sheets", use_container_width=True, type="primary" if is_sheet_view else "secondary"):
-        st.session_state["main_view"] = "sheets"
-        st.rerun()
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# 6. VISUALIZAÇÕES
+# 5. VISUALIZAÇÕES
 if st.session_state["main_view"] == "chat":
     # Sugestões Rápidas de Perguntas (Chips)
     st.markdown("**Perguntas Frequentes & Exemplos Rápidos:**")

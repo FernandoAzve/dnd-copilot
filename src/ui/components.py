@@ -14,6 +14,11 @@ from ..storage.chat_storage import (
     delete_session,
     rename_session
 )
+from ..storage.audit_storage import (
+    list_audits,
+    get_audit,
+    delete_audit
+)
 from ..auth.auth_ui import render_user_profile_sidebar
 
 CONDITIONS_LIST = [
@@ -35,58 +40,111 @@ CONDITIONS_LIST = [
 ]
 
 def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
-    """Renderiza a barra lateral com perfil do usuário, histórico privado, configurações, dados e livros."""
+    """Renderiza a barra lateral unificada com navegação de módulos, histórico contextual, dados e livros."""
     username = user_data.get("username") if user_data else None
     is_admin = user_data.get("is_admin", False) if user_data else True
+    current_view = st.session_state.get("main_view", "chat")
 
     with st.sidebar:
         st.markdown("## 🧙‍♂️ **Grimório do Sábio**")
         st.caption("Assistente & Mentor de D&D 5e / 2024")
         
-        # 1. Gerenciador de Sessões de Chat (Privado do Usuário)
-        if st.button("➕ **Nova Conversa**", use_container_width=True, type="primary"):
-            new_id = create_session(mode=agent.mode, model=agent.model_name, username=username)
-            st.session_state["current_session_id"] = new_id
-            session_data = load_session(new_id, username=username)
-            if session_data:
-                st.session_state["messages"] = session_data.get("messages", [])
-            agent.reset_chat()
-            st.rerun()
+        # 1. NAVEGAÇÃO PRINCIPAL ENTRE MÓDULOS (GRIMÓRIO VS AUDITOR DE FICHAS)
+        col_nav1, col_nav2 = st.columns(2)
+        is_chat_active = (current_view == "chat")
+        with col_nav1:
+            if st.button("💬 **Grimório**", key="nav_btn_chat", use_container_width=True, type="primary" if is_chat_active else "secondary"):
+                st.session_state["main_view"] = "chat"
+                st.rerun()
+        with col_nav2:
+            if st.button("📋 **Fichas**", key="nav_btn_sheets", use_container_width=True, type="secondary" if is_chat_active else "primary"):
+                st.session_state["main_view"] = "sheets"
+                st.rerun()
 
-        # Histórico de Conversas Salvas do Usuário
-        with st.expander("📜 **Histórico de Conversas**", expanded=False):
-            sessions = list_sessions(username=username)
-            if not sessions:
-                st.caption("Nenhuma conversa salva ainda.")
-            else:
-                current_id = st.session_state.get("current_session_id")
-                for s in sessions:
-                    s_id = s["id"]
-                    is_active = (s_id == current_id)
-                    badge = " 🟢" if is_active else ""
-                    
-                    col_btn, col_del = st.columns([4, 1])
-                    with col_btn:
-                        btn_label = f"{s['title'][:24]}{badge}"
-                        if st.button(btn_label, key=f"load_sess_{s_id}", use_container_width=True, disabled=is_active):
-                            loaded = load_session(s_id, username=username)
-                            if loaded:
-                                st.session_state["current_session_id"] = s_id
-                                st.session_state["messages"] = loaded.get("messages", [])
-                                agent.update_config(mode=loaded.get("mode"), model_name=loaded.get("model"))
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # 2. HISTÓRICO CONTEXTUAL (CHAT DE REGRAS VS AUDITOR DE FICHAS)
+        if current_view == "chat":
+            # Botão Nova Conversa
+            if st.button("➕ **Nova Conversa**", key="btn_new_chat", use_container_width=True, type="primary"):
+                new_id = create_session(mode=agent.mode, model=agent.model_name, username=username)
+                st.session_state["current_session_id"] = new_id
+                session_data = load_session(new_id, username=username)
+                if session_data:
+                    st.session_state["messages"] = session_data.get("messages", [])
+                agent.reset_chat()
+                st.rerun()
+
+            # Lista de Conversas de Chat Salvas
+            with st.expander("📜 **Conversas de Regras**", expanded=True):
+                sessions = list_sessions(username=username)
+                if not sessions:
+                    st.caption("Nenhuma conversa salva ainda.")
+                else:
+                    current_id = st.session_state.get("current_session_id")
+                    for s in sessions:
+                        s_id = s["id"]
+                        is_active = (s_id == current_id)
+                        badge = " 🟢" if is_active else ""
+                        
+                        col_btn, col_del = st.columns([4, 1])
+                        with col_btn:
+                            btn_label = f"{s['title'][:22]}{badge}"
+                            if st.button(btn_label, key=f"load_sess_{s_id}", use_container_width=True, disabled=is_active):
+                                loaded = load_session(s_id, username=username)
+                                if loaded:
+                                    st.session_state["current_session_id"] = s_id
+                                    st.session_state["messages"] = loaded.get("messages", [])
+                                    agent.update_config(mode=loaded.get("mode"), model_name=loaded.get("model"))
+                                    st.rerun()
+                        with col_del:
+                            if st.button("🗑️", key=f"del_sess_{s_id}", help=f"Excluir '{s['title']}'"):
+                                delete_session(s_id, username=username)
+                                if s_id == current_id:
+                                    new_id = create_session(username=username)
+                                    st.session_state["current_session_id"] = new_id
+                                    st.session_state["messages"] = load_session(new_id, username=username)["messages"]
                                 st.rerun()
-                    with col_del:
-                        if st.button("🗑️", key=f"del_sess_{s_id}", help=f"Excluir '{s['title']}'"):
-                            delete_session(s_id, username=username)
-                            if s_id == current_id:
-                                new_id = create_session(username=username)
-                                st.session_state["current_session_id"] = new_id
-                                st.session_state["messages"] = load_session(new_id, username=username)["messages"]
-                            st.rerun()
+
+        else:
+            # Botão Nova Ficha
+            is_nova_active = (st.session_state.get("selected_audit_id") == "nova")
+            if st.button("➕ **Nova Auditoria de Ficha**", key="btn_new_audit", use_container_width=True, type="primary" if is_nova_active else "secondary"):
+                st.session_state["selected_audit_id"] = "nova"
+                st.rerun()
+
+            # Lista de Fichas Auditadas
+            with st.expander("📜 **Fichas Auditadas**", expanded=True):
+                audits = list_audits(username=username)
+                if not audits:
+                    st.caption("Nenhuma ficha auditada ainda.")
+                else:
+                    curr_audit = st.session_state.get("selected_audit_id")
+                    for a in audits:
+                        a_id = a["id"]
+                        is_selected = (a_id == curr_audit)
+                        char_name = a.get("character_name", "Ficha")
+                        class_lvl = a.get("class_level", "")
+                        has_issues = a.get("has_issues", False)
+                        status_icon = "⚠️" if has_issues else "✅"
+                        badge = " 🟢" if is_selected else ""
+                        
+                        col_btn, col_del = st.columns([4, 1])
+                        with col_btn:
+                            btn_label = f"{status_icon} {char_name[:16]}{badge}"
+                            if st.button(btn_label, key=f"sel_aud_{a_id}", use_container_width=True, disabled=is_selected):
+                                st.session_state["selected_audit_id"] = a_id
+                                st.rerun()
+                        with col_del:
+                            if st.button("🗑️", key=f"del_aud_{a_id}", help=f"Excluir ficha de {char_name}"):
+                                delete_audit(a_id, username=username)
+                                if curr_audit == a_id:
+                                    st.session_state["selected_audit_id"] = "nova"
+                                st.rerun()
 
         st.divider()
 
-        # 2. Configurações de Atuação da IA
+        # 3. Configurações de Atuação da IA
         with st.expander("⚙️ **Modo de Atuação da IA**", expanded=False):
             mode_options = {
                 "mentor": "🧙‍♂️ Mentor de Iniciantes",
@@ -113,7 +171,7 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
 
         st.divider()
 
-        # 3. Rolador de Dados Rápido
+        # 4. Rolador de Dados Rápido
         st.markdown("### 🎲 **Rolador de Dados**")
         
         cols = st.columns(4)
@@ -150,7 +208,7 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
 
         st.divider()
 
-        # 4. Guia Rápido de Condições
+        # 5. Guia Rápido de Condições
         with st.expander("🛡️ **Consulta Rápida: Condições**", expanded=False):
             cond_chosen = st.selectbox("Selecione uma condição:", options=CONDITIONS_LIST)
             if cond_chosen:
@@ -161,7 +219,7 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
 
         st.divider()
 
-        # 5. Ingestão e Biblioteca de Livros (PDFs) com Controle de Acesso (RBAC)
+        # 6. Ingestão e Biblioteca de Livros (PDFs) com Controle de Acesso (RBAC)
         with st.expander("📚 **Biblioteca de Livros (PDFs)**", expanded=False):
             st.caption("Manuais e suplementos de D&D indexados na memória compartilhada.")
             
@@ -261,12 +319,12 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
             else:
                 st.caption("🛡️ *Apenas o Mestre Administrador pode adicionar ou remover livros da biblioteca.*")
 
-        # 6. Painel de Perfil e Logout
+        # 7. Painel de Perfil e Logout
         if user_data:
             render_user_profile_sidebar(user_data, agent)
 
 def render_chat_message(role: str, content: str, tool_logs: Optional[List[Dict[str, Any]]] = None):
-    """Renderiza uma mensagem de chat com visual temático."""
+    """Renderiza uma mensagem de chat com visual temático e limpo."""
     avatar = "🧙‍♂️" if role == "model" or role == "assistant" else "👤"
     with st.chat_message(role, avatar=avatar):
         st.markdown(content)
