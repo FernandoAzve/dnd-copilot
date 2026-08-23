@@ -1,0 +1,150 @@
+{
+  "conditions": [
+    {
+      "name_pt": "Agarrado",
+      "name_en": "Grappled",
+      "effects": [
+        "O deslocamento da criatura agarrada se torna 0 e não pode aumentar além de 0.",
+        "A condição termina se quem a agarrou ficar Incapacitado.",
+        "A condição termina se um efeito mover a criatura agarrada para fora do alcance do agarrador (ex: Onda Trovejante)."
+      ],
+      "changes_2024": "Na edição 2024, ataques contra a criatura agarrada têm Vantagem para o agarrador, e a criatura agarrada tem Desvantagem em ataques contra qualquer alvo que não seja quem a agarrou."
+    },
+    {
+      "name_pt": "Amedrontado",
+      "name_en": "Frightened",
+      "effects": [
+        "A criatura tem Desvantagem em testes de habilidade e jogadas de ataque enquanto a fonte do medo estiver em sua linha de visão.",
+        "A criatura não pode se mover voluntariamente para uma posição mais próxima da fonte do seu medo."
+      ]
+    },
+    {
+      "name_pt": "Atordoado",
+      "name_en": "Stunned",
+      "effects": [
+        "A criatura fica Incapacitada (não pode realizar Ações nem Reações) e não pode se mover, podendo apenas balbuciar.",
+        "A criatura falha automaticamente em testes de resistência de Força e Destreza.",
+        "Jogadas de ataque contra a criatura têm Vantagem."
+      ]
+    },
+    {
+      "name_pt": "Caído",
+      "name_en": "Prone",
+      "effects": [
+        "A única opção de movimento da criatura é rastejar, a menos que se levante gastando metade do seu deslocamento total.",
+        "A criatura tem Desvantagem em jogadas de ataque.",
+        "Jogadas de ataque contra a criatura têm Vantagem se o atacante estiver a até 1,5 metro (5 pés). Caso contrário, o ataque tem Desvantagem."
+      ]
+    },
+    {
+      "name_pt": "Cego",
+      "name_en": "Blinded",
+      "effects": [
+        "A criatura não enxerga e falha automaticamente em qualquer teste que exija a visão.",
+        "Jogadas de ataque contra a criatura têm Vantagem.",
+        "As jogadas de ataque feitas pela criatura têm Desvantagem."
+      ]
+    },
+    {
+      "name_pt": "Enfeitiçado",
+      "name_en": "Charmed",
+      "effects": [
+        "A criatura enfeitiçada não pode atacar o encantador ou tê-lo como alvo de efeitos nocivos ou mágicos prejudiciais.",
+        "O encantador tem Vantagem em qualquer teste de habilidade para interagir socialmente com a criatura."
+      ]
+    },
+    {
+      "name_pt": "Envenenado",
+      "name_en": "Poisoned",
+      "effects": [
+        "A criatura envenenada tem Desvantagem em jogadas de ataque e em testes de atributo."
+      ]
+    },
+    {
+      "name_pt": "Exausto",
+      "name_en": "Exhaustion",
+      "effects_2014": [
+        "Nível 1: Desvantagem em testes de atributo",
+        "Nível 2: Deslocamento reduzido à metade",
+        "Nível 3: Desvantagem em jogadas de ataque e testes de resistência",
+        "Nível 4: Pontos de vida máximos reduzidos à metade",
+        "Nível 5: Deslocamento reduzido a 0",
+        "Nível 6: Morte imediata"
+      ],
+      "effects_2024": [
+        "A condição agora tem até 10 níveis acumuláveis.",
+        "Para cada nível de exaustão, você subtrai 2x o nível de todas as jogadas de d20 (ataques, salvaguardas, testes de perícia).",
+        "O deslocamento é reduzido em 1,5m (5 pés) por nível.",
+        "Ao atingir nível 10 de exaustão, a criatura morre imediatamente.",
+        "Um descanso longo remove 1 ou mais níveis de exaustão dependendo do descanso e alimentação."
+      ]
+    },
+    {
+      "name_pt": "Incapacitado",
+      "name_en": "Incapacitated",
+      "effects": [
+        "A criatura não pode realizar Ações nem Reações.",
+        "A criatura perde a Concentração em qualquer magia que estiver mantendo.",
+        "A criatura não pode falar."
+      ]
+    },
+    {
+      "name_pt": "Inconsciente",
+      "name_en": "Unconscious",
+      "effects": [
+        "A criatura fica Incapacitada, não pode se mover ou falar e não tem consciência do ambiente.",
+        "A criatura larga o que estiver segurando e cai no chão (Caído).",
+        "Falha automaticamente em testes de resistência de Força e Destreza.",
+        "Jogadas de ataque contra a criatura têm Vantagem.",
+        "Qualquer ataque que acerte a criatura é um Acerto Crítico se o atacante estiver a até 1,5 metro (5 pés)."
+      ]
+    },
+    {
+      "name_pt": "Invisível",
+      "name_en": "Invisible",
+      "effects": [
+        "A criatura é impossível de ser vista sem a ajuda de magia ou sentidos especiais. Para efeitos de esconderijo, é considerada fortemente obscurecida.",
+        "Jogadas de ataque contra a criatura têm Desvantagem.",
+        "Jogadas de ataque feitas pela criatura têm Vantagem."
+      ]
+    },
+    {
+      "name_pt": "Paralisado",
+      "name_en": "Paralyzed",
+      "effects": [
+        "A criatura fica Incapacitada e não pode se mover ou falar.",
+        "Falha automaticamente em testes de resistência de Força e Destreza.",
+        "Jogadas de ataque contra a criatura têm Vantagem.",
+        "Qualquer ataque que acerte a criatura é um Acerto Crítico se o atacante estiver a até 1,5 metro (5 pés)."
+      ]
+    },
+    {
+      "name_pt": "Petrificado",
+      "name_en": "Petrified",
+      "effects": [
+        "A criatura é transformada, junto com seus itens não mágicos, em uma substância sólida e inanimada (geralmente pedra). Seu peso aumenta em 10 vezes.",
+        "A criatura fica Incapacitada, não pode se mover ou falar e não tem consciência do ambiente.",
+        "Jogadas de ataque contra a criatura têm Vantagem.",
+        "Falha automaticamente em testes de resistência de Força e Destreza.",
+        "Tem Resistência a todos os tipos de dano e é Imune a Veneno e Doenças."
+      ]
+    },
+    {
+      "name_pt": "Restrito / Impedido",
+      "name_en": "Restrained",
+      "effects": [
+        "O deslocamento da criatura se torna 0 e não pode aumentar.",
+        "Jogadas de ataque contra a criatura têm Vantagem.",
+        "Jogadas de ataque feitas pela criatura têm Desvantagem.",
+        "A criatura tem Desvantagem em testes de resistência de Destreza."
+      ]
+    },
+    {
+      "name_pt": "Surdo",
+      "name_en": "Deafened",
+      "effects": [
+        "A criatura não ouve e falha automaticamente em qualquer teste de atributo que exija a audição."
+      ]
+    }
+  ]
+}

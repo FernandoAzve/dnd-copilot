@@ -1,0 +1,15 @@
+Coloque aqui os seus arquivos em formato PDF dos livros de D&D.
+
+Exemplos recomendados:
+- Livro do Jogador (Player's Handbook)
+- Livro do Mestre (Dungeon Master's Guide)
+- Manual dos Monstros (Monster Manual)
+- Caldeirão de Todas as Coisas de Tasha (Tasha's Cauldron of Everything)
+- Guia de Xanathar para Todas as Coisas (Xanathar's Guide to Everything)
+- Livro do Jogador 2024 / 5.5e (2024 Player's Handbook)
+
+Após colocar os arquivos aqui, você pode:
+1. Executar o script de indexação no terminal:
+   python src/rag/pdf_ingest.py
+OU
+2. Clicar no botão 'Indexar Livros (PDFs)' na barra lateral da aplicação Web (Streamlit).

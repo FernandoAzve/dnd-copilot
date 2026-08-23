@@ -1,0 +1,30 @@
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Variáveis de Ambiente & Chaves Secretas
+.env
+.env.local
+.env.*.local
+.streamlit/secrets.toml
+
+# Livros PDF Grandes / Direitos Autorais (opcional)
+data/pdf_books/*.pdf
+!data/pdf_books/.gitkeep
+
+# Dados locais de histórico de chat e auditorias (se não quiser compartilhar sessões locais)
+# data/chat_history/*.json
+# data/audit_history/*.json
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini

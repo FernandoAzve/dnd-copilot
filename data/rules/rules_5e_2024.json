@@ -1,0 +1,74 @@
+{
+  "rules": [
+    {
+      "topic": "Conjuração de Duas Magias no Mesmo Turno (Ação Bônus)",
+      "category": "Magia",
+      "edition_2014": "Se você lançar uma magia com o tempo de conjuração de Ação Bônus (seja um truque ou magia de nível), você NÃO pode lançar outra magia no mesmo turno, EXCETO um truque que tenha tempo de conjuração de 1 Ação.",
+      "edition_2024": "A regra mudou para a 'Regra do Espaço de Magia': Você só pode gastar no máximo 1 Espaço de Magia por turno. Portanto, se você lançar uma magia usando um espaço (com ação ou ação bônus), não pode gastar outro espaço de magia no mesmo turno, mas pode conjurar truques ou magias de itens sem gastar espaços.",
+      "faq": "Posso lançar Bola de Fogo e Passo Nebuloso no mesmo turno? Não (em ambas as edições). Posso lançar Raio de Fogo (truque) e Passo Nebuloso (ação bônus)? Sim."
+    },
+    {
+      "topic": "Uso de Poção de Cura em Combate",
+      "category": "Itens / Combate",
+      "edition_2014": "Beber ou administrar uma poção a outra criatura exige 1 Ação completa.",
+      "edition_2024": "Beber uma poção agora exige apenas 1 AÇÃO BÔNUS (para você mesmo). Administrar uma poção a outra criatura ainda requer 1 AÇÃO.",
+      "faq": "A regra clássica da casa virou oficial em 2024: beber em si mesmo é Ação Bônus."
+    },
+    {
+      "topic": "Concentração e Tomar Dano",
+      "category": "Magia",
+      "rule": "Sempre que sofrer dano enquanto estiver se concentrando em uma magia, você deve fazer um Teste de Resistência de Constituição. A CD é igual a 10 ou metade do total de dano sofrido (arredondado para baixo), o que for MAIOR. Se falhar, a magia termina imediatamente. Se sofrer dano de múltiplas fontes, faz um teste separado para cada fonte de dano.",
+      "faq": "Se eu tomar 28 de dano, qual a CD? A CD será 14 (metade de 28). Se tomar 6 de dano, qual a CD? A CD será 10 (mínimo)."
+    },
+    {
+      "topic": "Surpresa em Combate",
+      "category": "Combate",
+      "edition_2014": "Uma criatura surpresa não podia se mover ou realizar ações no seu primeiro turno de combate, e não podia usar reações até o fim desse turno.",
+      "edition_2024": "O conceito de 'Rodada Surpresa' foi reformulado: se você for pego de surpresa, você rola Iniciativa normalmente com DESVANTAGEM no teste de iniciativa, em vez de perder o turno inteiro.",
+      "faq": "Em 2024, criaturas emboscadas ainda agem no combate, mas têm desvantagem na iniciativa."
+    },
+    {
+      "topic": "Combate com Duas Armas (Empunhadura Dupla)",
+      "category": "Combate",
+      "edition_2014": "Quando você ataca com uma arma leve corpo a corpo em uma mão, pode usar uma Ação Bônus para atacar com uma arma leve diferente na outra mão (sem adicionar o modificador de atributo ao dano do segundo ataque, a não ser que seja negativo ou tenha o estilo de luta).",
+      "edition_2024": "Com a nova propriedade de Maestria de Armas 'Nick' (Talho), o ataque com a segunda arma leve agora faz parte da AÇÃO DE ATAQUE principal em vez de consumir a sua preciosa Ação Bônus!",
+      "faq": "Isso liberou a Ação Bônus para ladinos, patrulheiros e bárbaros que usam duas armas em 2024."
+    },
+    {
+      "topic": "Descanso Curto e Descanso Longo",
+      "category": "Descanso / Recuperação",
+      "short_rest": "Um Descanso Curto dura pelo menos 1 hora (ou 10 min em algumas variantes). Você pode gastar Dados de Vida (HD) para recuperar PV (rola o dado + mod de CON por dado gasto).",
+      "long_rest": "Um Descanso Longo dura pelo menos 8 horas (no máximo 2h de vigília leve). Recupera todos os PV perdidos e metade do total de Dados de Vida máximos do personagem. Em 2024, interrupções precisam durar mais de 1 hora de combate para cancelar o descanso.",
+      "faq": "Um personagem só pode se beneficiar de 1 Descanso Longo a cada período de 24 horas."
+    },
+    {
+      "topic": "Cobertura (+2 CA, +5 CA ou Imunidade)",
+      "category": "Combate",
+      "half_cover": "Meia Cobertura (+2 de bônus na CA e em testes de resistência de Destreza). Ex: parede baixa, móveis, outra criatura.",
+      "three_quarters_cover": "Três Quartos de Cobertura (+5 de bônus na CA e em testes de resistência de Destreza). Ex: seteira, tronco de árvore grosso.",
+      "total_cover": "Cobertura Total: O alvo não pode ser atingido diretamente por um ataque ou magia direcionada."
+    },
+    {
+      "topic": "Salvações Contra a Morte e Estabilização",
+      "category": "Combate / Saúde",
+      "rule": "Quando seus PV chegam a 0, você cai Inconsciente e começa a fazer Salvaguardas de Morte no início de cada um dos seus turnos.",
+      "rolls": "D20 sem modificador: 10 a 20 = Sucesso. 1 a 9 = Falha. 3 sucessos = Estabiliza. 3 falhas = Morte. 1 Natural = 2 falhas. 20 Natural = Você acorda imediatamente com 1 PV!",
+      "damage_at_zero": "Se você sofrer dano enquanto estiver com 0 PV: conta como 1 falha. Se o dano for de um acerto crítico (ex: ataque corpo a corpo adjacente), conta como 2 falhas. Se o dano restante for igual ou superior aos seus PV máximos, morte instantânea."
+    },
+    {
+      "topic": "Maestria de Armas (Weapon Mastery - Exclusivo 2024)",
+      "category": "Armas / 2024",
+      "rule": "Guerreiros, Bárbaros, Paladinos e Ladinos ganham propriedades especiais ao empunhar certas armas:",
+      "masteries": [
+        "Cleave (Glaive, Halberd): Se acertar uma criatura, pode fazer um ataque extra em outra adjacente.",
+        "Graze (Greatsword, Glaive): Se errar o ataque, ainda causa dano igual ao seu mod de atributo.",
+        "Nick (Dagger, Scimitar): Ataque com arma secundária não gasta Ação Bônus.",
+        "Push (Pike, Heavy Crossbow): Empurra o alvo até 3 metros (10 pés) se acertar.",
+        "Sap (Mace, Flail): Alvo tem desvantagem no próximo ataque.",
+        "Slow (Longbow, Club): Reduz o deslocamento do alvo em 3m (10 pés).",
+        "Topple (Battleaxe, Lance): Alvo deve passar em salvaguarda de CON ou cai no chão (Caído).",
+        "Vex (Shortsword, Hand Crossbow): Acertar dá Vantagem no seu próximo ataque contra o mesmo alvo."
+      ]
+    }
+  ]
+}

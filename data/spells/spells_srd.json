@@ -1,0 +1,130 @@
+{
+  "spells": [
+    {
+      "name_pt": "Bola de Fogo",
+      "name_en": "Fireball",
+      "level": 3,
+      "school": "Evocação",
+      "casting_time": "1 Ação",
+      "range": "45 metros (150 pés) / Esfera de 6m (20 pés) de raio",
+      "components": "V, S, M (uma pequena bola de guano de morcego e enxofre)",
+      "duration": "Instantânea",
+      "classes": ["Mago", "Feiticeiro"],
+      "description": "Uma explosão brilhante surge no ponto escolhido. Cada criatura na esfera deve fazer um Teste de Resistência de Destreza. Uma criatura sofre 8d6 de dano de fogo se falhar na salvaguarda, ou metade desse dano se obtiver sucesso. O fogo se espalha em esquinas e incendeia objetos inflamáveis não vestidos ou carregados.",
+      "higher_levels": "Quando você conjura esta magia usando um espaço de magia de 4º nível ou superior, o dano aumenta em 1d6 para cada nível do espaço acima do 3º."
+    },
+    {
+      "name_pt": "Curar Ferimentos",
+      "name_en": "Cure Wounds",
+      "level": 1,
+      "school": "Evocação",
+      "casting_time": "1 Ação",
+      "range": "Toque",
+      "components": "V, S",
+      "duration": "Instantânea",
+      "classes": ["Bardo", "Clérigo", "Druida", "Paladino", "Patrulheiro", "Artífice"],
+      "description": "Uma criatura que você toca recupera pontos de vida iguais a 1d8 + o seu modificador de habilidade de conjuração. Esta magia não tem efeito sobre mortos-vivos ou constructos. (Na versão 2024, cura 2d8 + mod!).",
+      "higher_levels": "Quando você conjura esta magia usando um espaço de magia de 2º nível ou superior, a cura aumenta em 1d8 para cada nível do espaço acima do 1º (ou 2d8 na versão 2024)."
+    },
+    {
+      "name_pt": "Palavra Curativa",
+      "name_en": "Healing Word",
+      "level": 1,
+      "school": "Evocação",
+      "casting_time": "1 Ação Bônus",
+      "range": "18 metros (60 pés)",
+      "components": "V",
+      "duration": "Instantânea",
+      "classes": ["Bardo", "Clérigo", "Druida"],
+      "description": "Uma criatura visível à sua escolha dentro do alcance recupera pontos de vida iguais a 1d4 + seu modificador de conjuração. (Na versão 2024, cura 2d4 + mod!). Excelente para reanimar aliados caídos como Ação Bônus à distância.",
+      "higher_levels": "Aumenta em 1d4 a cura por nível superior (ou 2d4 na versão 2024)."
+    },
+    {
+      "name_pt": "Escudo Arcano",
+      "name_en": "Shield",
+      "level": 1,
+      "school": "Abjuração",
+      "casting_time": "1 Reação (quando for atingido por um ataque ou pelo alvo de mísseis mágicos)",
+      "range": "Pessoal",
+      "components": "V, S",
+      "duration": "1 rodada (até o início do seu próximo turno)",
+      "classes": ["Mago", "Feiticeiro"],
+      "description": "Uma barreira invisível de força mágica surge para protegê-lo. Até o início do seu próximo turno, você tem um bônus de +5 na sua Classe de Armadura (CA), incluindo contra o ataque desencadeador, e não sofre nenhum dano da magia Mísseis Mágicos."
+    },
+    {
+      "name_pt": "Mísseis Mágicos",
+      "name_en": "Magic Missile",
+      "level": 1,
+      "school": "Evocação",
+      "casting_time": "1 Ação",
+      "range": "36 metros (120 pés)",
+      "components": "V, S",
+      "duration": "Instantânea",
+      "classes": ["Mago", "Feiticeiro"],
+      "description": "Você cria três dardos brilhantes de força mágica. Cada dardo atinge uma criatura à sua escolha que você possa ver dentro do alcance. Um dardo causa 1d4 + 1 de dano de energia (Force) ao seu alvo. Os dardos acertam AUTOMATICAMENTE sem necessidade de teste de ataque ou salvaguarda!",
+      "higher_levels": "Cria +1 dardo para cada nível acima do 1º."
+    },
+    {
+      "name_pt": "Passo Nebuloso",
+      "name_en": "Misty Step",
+      "level": 2,
+      "school": "Conjuração",
+      "casting_time": "1 Ação Bônus",
+      "range": "Pessoal",
+      "components": "V",
+      "duration": "Instantânea",
+      "classes": ["Mago", "Feiticeiro", "Bruxo"],
+      "description": "Brevemente cercado por uma névoa prateada, você se teletransporta instantaneamente até 9 metros (30 pés) para um espaço desocupado que você possa ver."
+    },
+    {
+      "name_pt": "Bênção",
+      "name_en": "Bless",
+      "level": 1,
+      "school": "Encantamento",
+      "casting_time": "1 Ação",
+      "range": "9 metros (30 pés)",
+      "components": "V, S, M (uma gota de água benta)",
+      "duration": "Concentração, até 1 minuto",
+      "classes": ["Clérigo", "Paladino"],
+      "description": "Você abençoa até três criaturas à sua escolha dentro do alcance. Sempre que um alvo fizer uma jogada de ataque ou um teste de resistência antes que a magia termine, ele pode rolar um d4 e adicionar o número obtido ao resultado do ataque ou teste."
+    },
+    {
+      "name_pt": "Rajada Mística",
+      "name_en": "Eldritch Blast",
+      "level": 0,
+      "school": "Evocação",
+      "casting_time": "1 Ação",
+      "range": "36 metros (120 pés)",
+      "components": "V, S",
+      "duration": "Instantânea",
+      "classes": ["Bruxo (Warlock)"],
+      "description": "Um feixe de energia crepitante viaja em direção a uma criatura dentro do alcance. Faça uma jogada de ataque mágico à distância contra o alvo. Se acertar, o alvo sofre 1d10 de dano de energia (Force).",
+      "higher_levels": "A magia cria mais raios quando você atinge níveis mais altos: 2 raios no 5º nível, 3 raios no 11º nível e 4 raios no 17º nível. Você pode direcionar os raios para o mesmo alvo ou alvos diferentes."
+    },
+    {
+      "name_pt": "Raio de Fogo",
+      "name_en": "Fire Bolt",
+      "level": 0,
+      "school": "Evocação",
+      "casting_time": "1 Ação",
+      "range": "36 metros (120 pés)",
+      "components": "V, S",
+      "duration": "Instantânea",
+      "classes": ["Mago", "Feiticeiro", "Artífice"],
+      "description": "Você arremessa um caco de fogo em uma criatura ou objeto dentro do alcance. Faça um ataque mágico à distância. Se acertar, o alvo sofre 1d10 de dano de fogo. Um objeto inflamável atingido por esta magia incendeia se não estiver sendo usado ou carregado.",
+      "higher_levels": "O dano aumenta para 2d10 no 5º nível, 3d10 no 11º nível e 4d10 no 17º nível."
+    },
+    {
+      "name_pt": "Orientação",
+      "name_en": "Guidance",
+      "level": 0,
+      "school": "Adivinhação",
+      "casting_time": "1 Ação (ou Reação em 2024)",
+      "range": "Toque (ou 9m em 2024)",
+      "components": "V, S",
+      "duration": "Concentração, até 1 minuto",
+      "classes": ["Clérigo", "Druida", "Artífice"],
+      "description": "Você toca uma criatura voluntária. Uma vez antes da magia terminar, o alvo pode rolar um d4 e adicionar o número obtido a um teste de atributo de sua escolha. Ele pode rolar o dado antes ou depois de fazer o teste de atributo."
+    }
+  ]
+}

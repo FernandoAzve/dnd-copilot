@@ -1,0 +1,116 @@
+{
+  "terms": [
+    {
+      "pt": "Classe de Armadura",
+      "en": "Armor Class",
+      "abbr": "CA / AC",
+      "category": "Combate",
+      "description": "O número alvo que uma jogada de ataque precisa igualar ou superar para atingir uma criatura."
+    },
+    {
+      "pt": "Pontos de Vida",
+      "en": "Hit Points",
+      "abbr": "PV / HP",
+      "category": "Estatísticas",
+      "description": "A quantidade de dano que um personagem ou criatura pode suportar antes de cair inconsciente ou morrer."
+    },
+    {
+      "pt": "Dados de Vida",
+      "en": "Hit Dice",
+      "abbr": "DV / HD",
+      "category": "Estatísticas",
+      "description": "Dados usados para calcular o total de PV e para recuperar vida durante descansos curtos."
+    },
+    {
+      "pt": "Teste de Resistência / Salvaguarda",
+      "en": "Saving Throw",
+      "abbr": "Save",
+      "category": "Mecânica",
+      "description": "Uma rolagem de d20 para resistir a um efeito adverso (ex: veneno, magia de área, armadilha). Rola-se d20 + modificador do atributo + bônus de proficiência (se proficiente)."
+    },
+    {
+      "pt": "Bônus de Proficiência",
+      "en": "Proficiency Bonus",
+      "abbr": "BP / PB",
+      "category": "Estatísticas",
+      "description": "Bônus adicionado a testes em que o personagem é treinado (ataques com armas proficientes, testes de perícia proficientes, salvaguardas e CD de magias). Varia de +2 a +6 de acordo com o nível."
+    },
+    {
+      "pt": "Classe de Dificuldade",
+      "en": "Difficulty Class",
+      "abbr": "CD / DC",
+      "category": "Mecânica",
+      "description": "O número alvo necessário para obter sucesso em um teste de atributo, perícia ou teste de resistência."
+    },
+    {
+      "pt": "CD de Magia",
+      "en": "Spell Save DC",
+      "abbr": "CD Magia",
+      "category": "Magia",
+      "description": "Cálculo: 8 + Bônus de Proficiência + Modificador do Atributo de Conjuração do personagem."
+    },
+    {
+      "pt": "Bônus de Ataque Mágico",
+      "en": "Spell Attack Modifier",
+      "abbr": "Atq Magia",
+      "category": "Magia",
+      "description": "Cálculo: Bônus de Proficiência + Modificador do Atributo de Conjuração."
+    },
+    {
+      "pt": "Espaço de Magia",
+      "en": "Spell Slot",
+      "abbr": "Slot",
+      "category": "Magia",
+      "description": "Recursos que conjuradores gastam para lançar magias de 1º nível ou superior. Recuperados após descanso longo (ou curto no caso de Bruxo)."
+    },
+    {
+      "pt": "Truque",
+      "en": "Cantrip",
+      "abbr": "Nível 0",
+      "category": "Magia",
+      "description": "Magia simples de nível 0 que pode ser conjurada à vontade sem gastar espaços de magia."
+    },
+    {
+      "pt": "Concentração",
+      "en": "Concentration",
+      "abbr": "Conc.",
+      "category": "Magia",
+      "description": "Você só pode manter 1 magia de concentração por vez. Se tomar dano enquanto concentra, deve passar em um teste de resistência de Constituição (CD 10 ou metade do dano sofrido, o que for maior) para não perder a magia."
+    },
+    {
+      "pt": "Ação Bônus",
+      "en": "Bonus Action",
+      "abbr": "BA",
+      "category": "Combate",
+      "description": "Uma ação extra rápida disponível no seu turno apenas se uma habilidade, magia ou item especificar seu uso. Você tem no máximo 1 ação bônus por turno."
+    },
+    {
+      "pt": "Reação",
+      "en": "Reaction",
+      "abbr": "Reação",
+      "category": "Combate",
+      "description": "Uma resposta instantânea a um gatilho que ocorre fora ou dentro do seu turno (ex: Ataque de Oportunidade, magia Escudo Arcano). Você só tem 1 reação por rodada, recuperada no início do seu turno."
+    },
+    {
+      "pt": "Vantagem / Desvantagem",
+      "en": "Advantage / Disadvantage",
+      "abbr": "Adv / Disadv",
+      "category": "Mecânica",
+      "description": "Vantagem: rola 2d20 e escolhe o MAIOR. Desvantagem: rola 2d20 e escolhe o MENOR. Múltiplas fontes de vantagem ou desvantagem não se acumulam. Uma vantagem anula qualquer quantidade de desvantagens e vice-versa."
+    },
+    {
+      "pt": "Ataque de Oportunidade",
+      "en": "Opportunity Attack",
+      "abbr": "OA",
+      "category": "Combate",
+      "description": "Quando uma criatura hostil sai do seu alcance corpo a corpo sem usar a ação Desengajar, você pode usar sua Reação para fazer um ataque corpo a corpo contra ela."
+    },
+    {
+      "pt": "Salvação Contra a Morte",
+      "en": "Death Saving Throw",
+      "abbr": "Death Save",
+      "category": "Combate",
+      "description": "Ao iniciar seu turno com 0 PV, role 1d20 (sem modificadores). 10 ou mais = Sucesso. 9 ou menos = Falha. 3 sucessos = Estável. 3 falhas = Morto. 1 natural = 2 falhas. 20 natural = recupera 1 PV imediatamente."
+    }
+  ]
+}
