@@ -3,7 +3,8 @@ import streamlit as st
 def apply_custom_styles(theme_mode: str = "dark"):
     """
     Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), incluindo estilização temática para o upload de arquivos (PDFs e fotos).
+    e Modo Claro (Pergaminho Arcano), com bordas sólidas elegantes no file uploader,
+    e ícones de interrogação/tooltips com alto contraste e legibilidade cristalina.
     """
     is_light = (theme_mode == "light")
 
@@ -157,13 +158,13 @@ def apply_custom_styles(theme_mode: str = "dark"):
             font-weight: 500 !important;
         }
 
-        /* File Uploader Temático (Upload de Livros e Fichas) */
+        /* File Uploader Elegante com Borda Sólida */
         div[data-testid="stFileUploader"] section,
         section[data-testid="stFileUploadDropzone"],
         div[data-testid="stFileUploaderDropzone"],
         div[data-testid="stFileUploader"] {
             background-color: #f2ece0 !important;
-            border: 1px dashed #c4b595 !important;
+            border: 1px solid #c4b595 !important;
             border-radius: 8px !important;
             color: #1c1813 !important;
         }
@@ -188,6 +189,37 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #1c1813 !important;
             border: 1px solid #cfc1a5 !important;
             border-radius: 6px !important;
+        }
+
+        /* Ícone de Interrogação e Tooltip no Modo Claro */
+        div[data-testid="stTooltipIcon"] svg,
+        [data-testid="stTooltipIcon"] svg,
+        [data-testid="stTooltipHoverTarget"] svg,
+        div[data-testid="stTooltipIcon"] span,
+        div[data-testid="stTooltipIcon"] {
+            color: #8a5d14 !important;
+            fill: #8a5d14 !important;
+            opacity: 1 !important;
+        }
+
+        div[data-baseweb="tooltip"],
+        div[data-baseweb="tooltip"] > div,
+        div[data-testid="stTooltipContent"],
+        div[role="tooltip"],
+        .stTooltipContent {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            color: #1c1813 !important;
+            border: 1px solid #c4b595 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
+        }
+
+        div[data-baseweb="tooltip"] *,
+        div[role="tooltip"] * {
+            color: #1c1813 !important;
+            -webkit-text-fill-color: #1c1813 !important;
+            font-weight: 500 !important;
         }
 
         /* Tabelas */
@@ -484,13 +516,13 @@ def apply_custom_styles(theme_mode: str = "dark"):
             font-weight: 500 !important;
         }
 
-        /* File Uploader Temático no Modo Escuro */
+        /* File Uploader Elegante com Borda Sólida no Modo Escuro */
         div[data-testid="stFileUploader"] section,
         section[data-testid="stFileUploadDropzone"],
         div[data-testid="stFileUploaderDropzone"],
         div[data-testid="stFileUploader"] {
             background-color: #171b22 !important;
-            border: 1px dashed #c99a4e !important;
+            border: 1px solid #3d3424 !important;
             border-radius: 8px !important;
             color: #e8e3d9 !important;
         }
@@ -520,6 +552,37 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #e8e3d9 !important;
             border: 1px solid #3d3424 !important;
             border-radius: 6px !important;
+        }
+
+        /* Ícone de Interrogação e Tooltip no Modo Escuro */
+        div[data-testid="stTooltipIcon"] svg,
+        [data-testid="stTooltipIcon"] svg,
+        [data-testid="stTooltipHoverTarget"] svg,
+        div[data-testid="stTooltipIcon"] span,
+        div[data-testid="stTooltipIcon"] {
+            color: #e5b967 !important;
+            fill: #e5b967 !important;
+            opacity: 1 !important;
+        }
+
+        div[data-baseweb="tooltip"],
+        div[data-baseweb="tooltip"] > div,
+        div[data-testid="stTooltipContent"],
+        div[role="tooltip"],
+        .stTooltipContent {
+            background-color: #1f2530 !important;
+            background: #1f2530 !important;
+            color: #ffffff !important;
+            border: 1px solid #d4af37 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important;
+        }
+
+        div[data-baseweb="tooltip"] *,
+        div[role="tooltip"] * {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            font-weight: 500 !important;
         }
 
         /* Tabelas */
