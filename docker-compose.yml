@@ -1,0 +1,24 @@
+services:
+  dnd-copilot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dnd-copilot
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      # Persistência do banco de dados, usuários, histórico de chats e biblioteca de PDFs
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GEMINI_MODEL=gemini-3.6-flash
+      - ADMIN_USERNAMES=fernandoaz
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
