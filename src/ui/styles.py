@@ -1,43 +1,106 @@
 import streamlit as st
 
 def apply_custom_styles():
-    """Aplica estilo visual temático de RPG / Grimório de Fantasia responsivo para Desktop, Tablet e Celular."""
+    """
+    Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
+    e Modo Claro (Pergaminho Arcano), garantindo contraste e legibilidade impecáveis.
+    """
     custom_css = """
     <style>
-    /* 1. Estilo Geral e Paleta de Cores D&D */
+    /* ==========================================================================
+       1. DEFINIÇÃO DE VARIÁVEIS DE TEMA (DARK MODE PADRÃO / GRIMÓRIO)
+       ========================================================================== */
     :root {
+        --app-bg: #0f1115;
+        --sidebar-bg: #14171d;
         --primary-gold: #c99a4e;
         --bright-gold: #e5b967;
-        --dark-gold: #8c6a2e;
-        --bg-dark: #0f1115;
-        --panel-dark: #1b1f27;
-        --border-gold: #3d3424;
-        --text-light: #e8e3d9;
+        --text-main: #e8e3d9;
         --text-muted: #a09a8f;
-        --accent-red: #9e2a2b;
+        --border-color: #3d3424;
+        
+        --pill-bg: linear-gradient(135deg, #1b202a 0%, #12151b 100%);
+        --pill-border: #3d3424;
+        --pill-name: #f5f0e1;
+        --pill-role: #e5b967;
+        
+        --chat-msg-bg: #171b22;
+        --chat-msg-border: #2d3442;
+        
+        --btn-bg: linear-gradient(180deg, #282f3c 0%, #191e27 100%);
+        --btn-border: #3d3424;
+        --btn-text: #f1ebd9;
+        --btn-hover-bg: linear-gradient(180deg, #374154 0%, #232a36 100%);
+        
+        --input-bg: #1a1e27;
+        --input-border: #3d3424;
+        --input-text: #f1ebd9;
+        
+        --scrollbar-thumb: #342d20;
     }
 
-    /* Fundo da página */
+    /* ==========================================================================
+       2. ADAPTAÇÃO PARA MODO CLARO (PERGAMINHO ARCANO)
+       ========================================================================== */
+    @media (prefers-color-scheme: light) {
+        :root {
+            --app-bg: #f8f5ee;
+            --sidebar-bg: #eee8dc;
+            --primary-gold: #8a5d14;
+            --bright-gold: #74460a;
+            --text-main: #231f18;
+            --text-muted: #5e5648;
+            --border-color: #cfc1a5;
+            
+            --pill-bg: linear-gradient(135deg, #ffffff 0%, #f4ede1 100%);
+            --pill-border: #cfc1a5;
+            --pill-name: #231f18;
+            --pill-role: #8a5d14;
+            
+            --chat-msg-bg: #ffffff;
+            --chat-msg-border: #ded3bc;
+            
+            --btn-bg: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%);
+            --btn-border: #c9b999;
+            --btn-text: #2a241b;
+            --btn-hover-bg: linear-gradient(180deg, #faf7f0 0%, #e4d8c2 100%);
+            
+            --input-bg: #ffffff;
+            --input-border: #c9b999;
+            --input-text: #231f18;
+            
+            --scrollbar-thumb: #c4b595;
+        }
+    }
+
+    /* ==========================================================================
+       3. APLICAÇÃO DOS ESTILOS GERAIS E ESTRUTURA
+       ========================================================================== */
     .stApp {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
+        background-color: var(--app-bg) !important;
+        color: var(--text-main) !important;
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     }
 
-    /* Barra lateral */
     section[data-testid="stSidebar"] {
-        background-color: #14171d;
-        border-right: 1px solid var(--border-gold);
+        background-color: var(--sidebar-bg) !important;
+        border-right: 1px solid var(--border-color) !important;
     }
 
-    /* Títulos e Tipografia */
-    h1, h2, h3 {
+    /* Tipografia e Títulos */
+    h1, h2, h3, h4, h5, h6 {
         color: var(--bright-gold) !important;
         font-family: 'Cinzel', 'Georgia', serif;
         letter-spacing: 0.5px;
     }
 
-    /* 2. Cabeçalho Principal Responsivo com Container Flexbox */
+    p, span, label, div {
+        color: inherit;
+    }
+
+    /* ==========================================================================
+       4. CABEÇALHO PRINCIPAL E BADGE DE USUÁRIO
+       ========================================================================== */
     .app-header-container {
         display: flex;
         justify-content: space-between;
@@ -46,7 +109,7 @@ def apply_custom_styles():
         gap: 12px;
         margin-bottom: 12px;
         padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-gold);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .app-header-titles {
@@ -71,22 +134,21 @@ def apply_custom_styles():
         font-style: italic;
     }
 
-    /* 3. Badge / Pill de Usuário Temático */
     .user-profile-pill {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: linear-gradient(135deg, #1b202a 0%, #12151b 100%);
-        border: 1px solid var(--border-gold);
+        background: var(--pill-bg);
+        border: 1px solid var(--pill-border);
         border-radius: 24px;
         padding: 6px 16px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
         transition: all 0.2s ease;
     }
 
     .user-profile-pill:hover {
         border-color: var(--bright-gold);
-        box-shadow: 0 0 12px rgba(212, 167, 85, 0.25);
+        box-shadow: 0 0 10px rgba(201, 154, 78, 0.25);
     }
 
     .user-profile-avatar {
@@ -102,21 +164,23 @@ def apply_custom_styles():
 
     .user-profile-name {
         font-weight: 700;
-        color: #f5f0e1;
+        color: var(--pill-name);
         font-size: 0.88rem;
     }
 
     .user-profile-role {
         font-size: 0.75rem;
         font-weight: 600;
-        color: var(--bright-gold);
+        color: var(--pill-role);
     }
 
-    /* 4. Botões Estilizados e Touch-Friendly */
+    /* ==========================================================================
+       5. BOTÕES E COMPONENTES INTERATIVOS
+       ========================================================================== */
     .stButton > button {
-        background: linear-gradient(180deg, #282f3c 0%, #191e27 100%);
-        color: #f1ebd9;
-        border: 1px solid var(--border-gold);
+        background: var(--btn-bg) !important;
+        color: var(--btn-text) !important;
+        border: 1px solid var(--btn-border) !important;
         border-radius: 6px;
         font-weight: 600;
         min-height: 38px;
@@ -124,23 +188,44 @@ def apply_custom_styles():
     }
 
     .stButton > button:hover {
-        background: linear-gradient(180deg, #374154 0%, #232a36 100%);
-        border-color: var(--bright-gold);
-        color: #ffffff;
-        box-shadow: 0 0 8px rgba(212, 167, 85, 0.35);
+        background: var(--btn-hover-bg) !important;
+        border-color: var(--bright-gold) !important;
+        box-shadow: 0 0 8px rgba(201, 154, 78, 0.3);
     }
 
-    /* 5. Cartões de Conteúdo e Chat */
+    /* Botão Primário (Dourado de Destaque) */
+    .stButton > button[kind="primary"], .stButton > button[data-testid="baseButton-primary"] {
+        background: linear-gradient(180deg, #c99a4e 0%, #a8792c 100%) !important;
+        color: #1a1408 !important;
+        border: 1px solid #7c581d !important;
+        font-weight: 700;
+    }
+
+    .stButton > button[kind="primary"]:hover, .stButton > button[data-testid="baseButton-primary"]:hover {
+        background: linear-gradient(180deg, #dfb15b 0%, #bd8c36 100%) !important;
+        color: #000000 !important;
+        box-shadow: 0 0 12px rgba(201, 154, 78, 0.5) !important;
+    }
+
+    /* Balões de Chat */
     .stChatMessage {
-        background: #171b22 !important;
-        border: 1px solid #2d3442 !important;
+        background: var(--chat-msg-bg) !important;
+        border: 1px solid var(--chat-msg-border) !important;
         border-radius: 8px;
         margin-bottom: 12px;
+        color: var(--text-main) !important;
     }
 
-    /* 6. RESPONSIVIDADE (MEDIA QUERIES) */
-    
-    /* Tablets (Max-width: 992px) */
+    /* Expansores */
+    .streamlit-expanderHeader {
+        background-color: var(--chat-msg-bg) !important;
+        border-radius: 6px !important;
+        color: var(--text-main) !important;
+    }
+
+    /* ==========================================================================
+       6. RESPONSIVIDADE (MEDIA QUERIES)
+       ========================================================================== */
     @media (max-width: 992px) {
         .app-header-title {
             font-size: 1.45rem !important;
@@ -153,7 +238,6 @@ def apply_custom_styles():
         }
     }
 
-    /* Celulares / Telas Pequenas (Max-width: 640px) */
     @media (max-width: 640px) {
         .app-header-container {
             flex-direction: column;
@@ -172,13 +256,12 @@ def apply_custom_styles():
             border-radius: 8px;
         }
         .stButton > button {
-            min-height: 42px; /* Área de toque confortável no celular */
+            min-height: 42px;
         }
         .stChatMessage {
             padding: 8px !important;
             font-size: 0.9rem;
         }
-        /* Tabelas com scroll horizontal suave no celular */
         table {
             display: block;
             max-width: 100%;
@@ -193,10 +276,10 @@ def apply_custom_styles():
         height: 7px;
     }
     ::-webkit-scrollbar-track {
-        background: #0f1115;
+        background: var(--app-bg);
     }
     ::-webkit-scrollbar-thumb {
-        background: #342d20;
+        background: var(--scrollbar-thumb);
         border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
