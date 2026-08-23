@@ -2,9 +2,9 @@ import streamlit as st
 
 def apply_custom_styles(theme_mode: str = "dark"):
     """
-    Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), com bordas sólidas elegantes no file uploader,
-    e ícones de interrogação/tooltips com alto contraste e legibilidade cristalina.
+    Aplica estilo visual temático de RPG com suporte completo e estrito a Modo Escuro (Grimório)
+    e Modo Claro (Pergaminho Arcano), cobrindo 100% de botões (normais, download, form submit,
+    file uploader), inputs, tooltips, cabeçalhos e modais.
     """
     is_light = (theme_mode == "light")
 
@@ -178,12 +178,6 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #4e4436 !important;
         }
 
-        div[data-testid="stFileUploader"] button {
-            background: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%) !important;
-            color: #1c1813 !important;
-            border: 1px solid #c9b999 !important;
-        }
-
         div[data-testid="stFileUploaderFileData"] {
             background-color: #ffffff !important;
             color: #1c1813 !important;
@@ -280,26 +274,45 @@ def apply_custom_styles(theme_mode: str = "dark"):
             padding: 6px 10px !important;
         }
 
-        /* Botões Normais */
-        .stButton > button {
+        /* ========================================================
+           SISTEMA UNIFICADO DE BOTÕES (MODO CLARO)
+           ======================================================== */
+        
+        /* 1. Botões Secundários e Botões Padrão (st.button, st.download_button, file uploader) */
+        .stButton > button,
+        div[data-testid="stDownloadButton"] > button,
+        div[data-testid="stDownloadButton"] button,
+        div[data-testid="stFileUploader"] button,
+        button[data-testid="baseButton-secondary"],
+        button[kind="secondary"] {
             background: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%) !important;
             color: #1c1813 !important;
             border: 1px solid #c9b999 !important;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 6px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
         }
 
-        .stButton > button:hover {
+        .stButton > button:hover,
+        div[data-testid="stDownloadButton"] > button:hover,
+        div[data-testid="stDownloadButton"] button:hover,
+        div[data-testid="stFileUploader"] button:hover,
+        button[data-testid="baseButton-secondary"]:hover,
+        button[kind="secondary"]:hover {
             background: linear-gradient(180deg, #faf7f0 0%, #e4d8c2 100%) !important;
             border-color: #8a5d14 !important;
+            color: #6b3f02 !important;
             box-shadow: 0 0 8px rgba(138, 93, 20, 0.3) !important;
         }
 
-        /* Botões Primários e Botões Ativos no Histórico */
+        /* 2. Botões Primários, Destaques e Envio de Formulário */
         .stButton > button[kind="primary"],
         .stButton > button[data-testid="baseButton-primary"],
+        div[data-testid="stDownloadButton"] > button[kind="primary"],
+        div[data-testid="stDownloadButton"] > button[data-testid="baseButton-primary"],
         div[data-testid="stFormSubmitButton"] button,
-        .stFormSubmitButton > button {
+        .stFormSubmitButton > button,
+        button[kind="primary"] {
             background: linear-gradient(180deg, #a36f1c 0%, #7c500c 100%) !important;
             color: #ffffff !important;
             border: 1px solid #5a3804 !important;
@@ -309,8 +322,11 @@ def apply_custom_styles(theme_mode: str = "dark"):
 
         .stButton > button[kind="primary"]:hover,
         .stButton > button[data-testid="baseButton-primary"]:hover,
+        div[data-testid="stDownloadButton"] > button[kind="primary"]:hover,
+        div[data-testid="stDownloadButton"] > button[data-testid="baseButton-primary"]:hover,
         div[data-testid="stFormSubmitButton"] button:hover,
-        .stFormSubmitButton > button:hover {
+        .stFormSubmitButton > button:hover,
+        button[kind="primary"]:hover {
             background: linear-gradient(180deg, #b87e22 0%, #8f5c10 100%) !important;
             color: #ffffff !important;
             box-shadow: 0 0 10px rgba(138, 93, 20, 0.4) !important;
@@ -536,17 +552,6 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #a09a8f !important;
         }
 
-        div[data-testid="stFileUploader"] button {
-            background: linear-gradient(180deg, #282f3c 0%, #191e27 100%) !important;
-            color: #f1ebd9 !important;
-            border: 1px solid #3d3424 !important;
-        }
-
-        div[data-testid="stFileUploader"] button:hover {
-            background: linear-gradient(180deg, #374154 0%, #232a36 100%) !important;
-            border-color: #e5b967 !important;
-        }
-
         div[data-testid="stFileUploaderFileData"] {
             background-color: #1a1e27 !important;
             color: #e8e3d9 !important;
@@ -639,26 +644,45 @@ def apply_custom_styles(theme_mode: str = "dark"):
             padding: 6px 10px !important;
         }
 
-        /* Botões Normais */
-        .stButton > button {
+        /* ========================================================
+           SISTEMA UNIFICADO DE BOTÕES (MODO ESCURO)
+           ======================================================== */
+
+        /* 1. Botões Secundários e Botões Padrão (st.button, st.download_button, file uploader) */
+        .stButton > button,
+        div[data-testid="stDownloadButton"] > button,
+        div[data-testid="stDownloadButton"] button,
+        div[data-testid="stFileUploader"] button,
+        button[data-testid="baseButton-secondary"],
+        button[kind="secondary"] {
             background: linear-gradient(180deg, #282f3c 0%, #191e27 100%) !important;
             color: #f1ebd9 !important;
             border: 1px solid #3d3424 !important;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 6px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important;
         }
 
-        .stButton > button:hover {
+        .stButton > button:hover,
+        div[data-testid="stDownloadButton"] > button:hover,
+        div[data-testid="stDownloadButton"] button:hover,
+        div[data-testid="stFileUploader"] button:hover,
+        button[data-testid="baseButton-secondary"]:hover,
+        button[kind="secondary"]:hover {
             background: linear-gradient(180deg, #374154 0%, #232a36 100%) !important;
             border-color: #e5b967 !important;
+            color: #ffffff !important;
             box-shadow: 0 0 8px rgba(229, 185, 103, 0.3) !important;
         }
 
-        /* Botões Primários e Botões Ativos no Histórico */
+        /* 2. Botões Primários, Destaques e Envio de Formulário */
         .stButton > button[kind="primary"],
         .stButton > button[data-testid="baseButton-primary"],
+        div[data-testid="stDownloadButton"] > button[kind="primary"],
+        div[data-testid="stDownloadButton"] > button[data-testid="baseButton-primary"],
         div[data-testid="stFormSubmitButton"] button,
-        .stFormSubmitButton > button {
+        .stFormSubmitButton > button,
+        button[kind="primary"] {
             background: linear-gradient(180deg, #c99a4e 0%, #a8792c 100%) !important;
             color: #1a1408 !important;
             border: 1px solid #7c581d !important;
@@ -668,8 +692,11 @@ def apply_custom_styles(theme_mode: str = "dark"):
 
         .stButton > button[kind="primary"]:hover,
         .stButton > button[data-testid="baseButton-primary"]:hover,
+        div[data-testid="stDownloadButton"] > button[kind="primary"]:hover,
+        div[data-testid="stDownloadButton"] > button[data-testid="baseButton-primary"]:hover,
         div[data-testid="stFormSubmitButton"] button:hover,
-        .stFormSubmitButton > button:hover {
+        .stFormSubmitButton > button:hover,
+        button[kind="primary"]:hover {
             background: linear-gradient(180deg, #dfb15b 0%, #bd8c36 100%) !important;
             color: #000000 !important;
             box-shadow: 0 0 12px rgba(229, 185, 103, 0.5) !important;
@@ -759,7 +786,8 @@ def apply_custom_styles(theme_mode: str = "dark"):
             justify-content: flex-start;
             border-radius: 8px;
         }
-        .stButton > button {
+        .stButton > button,
+        div[data-testid="stDownloadButton"] > button {
             min-height: 42px;
         }
         .stChatMessage {

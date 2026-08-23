@@ -116,10 +116,11 @@ def render_sheet_auditor_tab(agent, username: Optional[str] = None):
                 pdf_bytes = generate_sheet_pdf(audit_data)
                 safe_name = "".join(c for c in char_name if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
                 st.download_button(
-                    label="📄 **Baixar PDF**",
+                    label="📄 **Baixar Ficha em PDF**",
                     data=pdf_bytes,
                     file_name=f"Ficha_{safe_name}.pdf",
                     mime="application/pdf",
+                    type="primary",
                     use_container_width=True
                 )
             except Exception as e:
