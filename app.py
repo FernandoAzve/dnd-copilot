@@ -158,21 +158,20 @@ if st.session_state["main_view"] == "chat":
         st.session_state["pending_prompt"] = None
 
     if user_query:
-        # 1. Adicionar mensagem do usuário
+        # 1. Adicionar mensagem do usuário e renderizar na tela
         st.session_state.messages.append({"role": "user", "content": user_query})
         render_chat_message("user", user_query)
 
-        # 2. Obter resposta do agente com indicador de carregamento
-        with st.spinner("Consultando os tomos e pergaminhos de regras..."):
-            response_data = st.session_state.agent.answer_query(user_query)
-            bot_text = response_data.get("text", "Não obtive resposta.")
-            tool_logs = response_data.get("tool_logs", [])
+        # 2. Obter resposta do agente com STREAMING em tempo real
+        with st.chat_message("model", avatar="🧙‍♂️"):
+            stream_gen = st.session_state.agent.stream_query(user_query)
+            bot_text = st.write_stream(stream_gen)
 
-        # 3. Adicionar mensagem do agente ao histórico em memória
+        # 3. Adicionar mensagem completa do agente ao histórico em memória
         st.session_state.messages.append({
             "role": "model",
             "content": bot_text,
-            "tool_logs": tool_logs
+            "tool_logs": []
         })
         
         # 4. Salvar permanentemente no diretório privado do usuário
@@ -183,8 +182,6 @@ if st.session_state["main_view"] == "chat":
             model=st.session_state.agent.model_name,
             username=username
         )
-        
-        render_chat_message("model", bot_text, tool_logs)
         st.rerun()
 
 else:

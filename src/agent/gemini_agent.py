@@ -1,7 +1,7 @@
 import os
 import json
 import time
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Generator
 from dotenv import load_dotenv
 
 from ..tools.dice import roll_dice
@@ -74,7 +74,7 @@ TOOLS_MAP = {
 }
 
 class DnDAgent:
-    """Agente especialista em D&D que integra Gemini (Chat AFC com retry automático e redundância de modelos), RAG e Ferramentas."""
+    """Agente especialista em D&D que integra Gemini (Chat AFC com Streaming, retry automático e redundância), RAG e Ferramentas."""
 
     def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.5-flash", mode: str = "mentor"):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
@@ -139,8 +139,71 @@ class DnDAgent:
             config=config
         )
 
+    def stream_query(self, user_message: str) -> Generator[str, None, None]:
+        """
+        Gera a resposta em streaming palavra por palavra com suporte a AFC, RAG e cascata de contingência.
+        Yields chunks de texto em tempo real compatíveis com st.write_stream().
+        """
+        # 1. Recuperar contexto do RAG
+        rag_results = self.kb.search(user_message, top_k=3)
+        rag_context = ""
+        if rag_results:
+            rag_context = "\n### Contexto do Grimório (Base de Regras e Livros Indexados):\n"
+            for r in rag_results:
+                rag_context += f"[{r['category']} - {r['title']}]\n{r['content']}\n---\n"
+
+        system_instruction = get_system_prompt(self.mode)
+        if rag_context:
+            system_instruction += f"\n\n{rag_context}\nUse as informações acima para enriquecer suas explicações com citações exatas de regras e páginas quando aplicável."
+
+        # Se não houver chave de API configurada
+        if not self.client:
+            fallback = self._offline_fallback_response(user_message, rag_results)
+            yield fallback["text"]
+            return
+
+        models_to_try = [self.model_name]
+        for m in MODEL_FALLBACK_CHAIN:
+            if m not in models_to_try:
+                models_to_try.append(m)
+
+        last_error = None
+        accumulated_text = []
+
+        for model_candidate in models_to_try:
+            for attempt in range(2):
+                try:
+                    chat = self._create_chat_session(model_candidate, system_instruction)
+                    stream_resp = chat.send_message_stream(user_message)
+                    for chunk in stream_resp:
+                        if chunk.text:
+                            accumulated_text.append(chunk.text)
+                            yield chunk.text
+
+                    final_full_text = "".join(accumulated_text)
+                    self.history.append({"role": "user", "content": user_message})
+                    self.history.append({"role": "model", "content": final_full_text})
+                    return
+
+                except Exception as err:
+                    err_str = str(err)
+                    last_error = err_str
+                    is_transient = "503" in err_str or "429" in err_str or "UNAVAILABLE" in err_str or "RESOURCE_EXHAUSTED" in err_str or "high demand" in err_str
+                    if is_transient:
+                        time.sleep(0.8 * (attempt + 1))
+                    else:
+                        break
+
+        # Se todos os modelos falharem na nuvem, emitir fallback local
+        fallback_data = self._offline_fallback_response(user_message, rag_results)
+        error_notice = (
+            "⚠️ **Os servidores do Google Gemini estão sob alta demanda temporária neste momento.**\n\n"
+            "*O Grimório ativou a base local de regras para responder à sua dúvida:*\n\n"
+        )
+        yield error_notice + fallback_data["text"]
+
     def answer_query(self, user_message: str) -> Dict[str, Any]:
-        """Processa a mensagem do usuário via Chat com AFC, retentativas e cascata de contingência automática."""
+        """Processa a mensagem do usuário em modo síncrono completo (compatibilidade retroativa)."""
         # 1. Recuperar contexto do RAG
         rag_results = self.kb.search(user_message, top_k=3)
         rag_context = ""
@@ -155,11 +218,9 @@ class DnDAgent:
 
         tool_logs = []
 
-        # Se não houver cliente configurado com chave
         if not self.client:
             return self._offline_fallback_response(user_message, rag_results)
 
-        # Montar cadeia de modelos: Começa com o modelo escolhido e inclui os de redundância
         models_to_try = [self.model_name]
         for m in MODEL_FALLBACK_CHAIN:
             if m not in models_to_try:
@@ -167,15 +228,13 @@ class DnDAgent:
 
         last_error = None
 
-        # Executar tentativa com retry e cascata de modelos em caso de 503 / 429
         for model_candidate in models_to_try:
-            for attempt in range(2):  # Até 2 tentativas por modelo com backoff
+            for attempt in range(2):
                 try:
                     chat = self._create_chat_session(model_candidate, system_instruction)
                     response = chat.send_message(user_message)
                     final_text = response.text or "Sem resposta textual."
 
-                    # Salvar no histórico
                     self.history.append({"role": "user", "content": user_message})
                     self.history.append({"role": "model", "content": final_text})
 
@@ -189,15 +248,12 @@ class DnDAgent:
                 except Exception as err:
                     err_str = str(err)
                     last_error = err_str
-                    # Se for erro de alta demanda (503) ou rate limit (429), aguardar brevemente antes do retry/fallback
                     is_transient = "503" in err_str or "429" in err_str or "UNAVAILABLE" in err_str or "RESOURCE_EXHAUSTED" in err_str or "high demand" in err_str
                     if is_transient:
                         time.sleep(0.8 * (attempt + 1))
                     else:
-                        # Erro não transitório no modelo, pular para o próximo candidato
                         break
 
-        # Se todos os modelos da cascata falharem após retentativas
         fallback_data = self._offline_fallback_response(user_message, rag_results)
         error_notice = (
             "⚠️ **Os servidores do Google Gemini estão sob alta demanda temporária neste momento.**\n\n"

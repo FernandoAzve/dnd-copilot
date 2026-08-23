@@ -23,3 +23,10 @@ def test_agent_fallback_mode():
     # Teste de busca de regra no fallback
     res_rule = agent.answer_query("Como funciona Concentração?")
     assert "Grimório" in res_rule["text"] or "Concentração" in res_rule["text"]
+
+def test_agent_stream_query():
+    agent = DnDAgent(api_key="")
+    stream = list(agent.stream_query("Role 1d20 com vantagem"))
+    assert len(stream) > 0
+    full_output = "".join(stream)
+    assert "🎲" in full_output or "Rolagem" in full_output

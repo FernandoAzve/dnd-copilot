@@ -118,26 +118,26 @@ def render_sheet_auditor_tab(agent, username: Optional[str] = None):
         for msg in messages:
             render_chat_message(role=msg["role"], content=msg["content"])
 
-        # Input de chat exclusivo desta ficha
         sheet_query = st.chat_input(f"Pergunte algo sobre {char_name} (ex: dano de ataque, regras 2024, talentos)...", key="sheet_active_chat_input")
         if sheet_query:
-            # 1. Salvar mensagem do usuário no histórico privado
+            # 1. Salvar mensagem do usuário no histórico privado e renderizar
             append_audit_message(audit_id, "user", sheet_query, username=username)
+            render_chat_message("user", sheet_query)
             
-            # 2. Consultar Gemini com contexto estrito da ficha e livros
-            with st.spinner(f"Consultando os tomos de regras sobre {char_name}..."):
-                context_prompt = (
-                    f"Você está em uma conversa contínua com o jogador sobre a seguinte ficha de personagem:\n"
-                    f"Nome: {char_name}\n"
-                    f"Classe e Nível: {class_lvl}\n\n"
-                    f"Relatório da Ficha:\n{audit_data.get('report')}\n\n"
-                    f"Dados Estruturados da Ficha:\n{json.dumps(audit_data.get('extracted_data', {}), ensure_ascii=False)}\n\n"
-                    f"Pergunta do Jogador: {sheet_query}\n\n"
-                    f"Responda de forma precisa, didática e cite a página do livro oficial de D&D 2024 quando aplicável."
-                )
-                
-                response_data = agent.answer_query(context_prompt)
-                bot_text = response_data.get("text", "Não obtive resposta.")
+            # 2. Consultar Gemini em STREAMING com contexto estrito da ficha e livros
+            context_prompt = (
+                f"Você está em uma conversa contínua com o jogador sobre a seguinte ficha de personagem:\n"
+                f"Nome: {char_name}\n"
+                f"Classe e Nível: {class_lvl}\n\n"
+                f"Relatório da Ficha:\n{audit_data.get('report')}\n\n"
+                f"Dados Estruturados da Ficha:\n{json.dumps(audit_data.get('extracted_data', {}), ensure_ascii=False)}\n\n"
+                f"Pergunta do Jogador: {sheet_query}\n\n"
+                f"Responda de forma precisa, didática e cite a página do livro oficial de D&D 2024 quando aplicável."
+            )
+            
+            with st.chat_message("model", avatar="🧙‍♂️"):
+                stream_gen = agent.stream_query(context_prompt)
+                bot_text = st.write_stream(stream_gen)
 
             # 3. Salvar resposta da IA no histórico da ficha
             append_audit_message(audit_id, "model", bot_text, username=username)
