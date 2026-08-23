@@ -3,8 +3,8 @@ import streamlit as st
 def apply_custom_styles(theme_mode: str = "dark"):
     """
     Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), garantindo que containers externos, inputs, botões
-    de formulário, placeholders e botões ativos no histórico fiquem perfeitos.
+    e Modo Claro (Pergaminho Arcano), garantindo que placeholders, expanders, botões
+    e caixas de texto tenham contraste nítido e impecável.
     """
     is_light = (theme_mode == "light")
 
@@ -126,16 +126,20 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #8a5d14 !important;
         }
 
-        /* Placeholders Nítidos */
+        /* Placeholders Nítidos no Modo Claro */
         ::placeholder,
         ::-webkit-input-placeholder,
         :-moz-placeholder,
         ::-moz-placeholder,
         :-ms-input-placeholder,
         textarea::placeholder,
-        input::placeholder {
-            color: #635847 !important;
+        input::placeholder,
+        div[data-testid="stChatInput"] textarea::placeholder,
+        div[data-testid="stChatInput"] textarea::-webkit-input-placeholder {
+            color: #5a4f3d !important;
+            -webkit-text-fill-color: #5a4f3d !important;
             opacity: 1 !important;
+            font-weight: 500 !important;
         }
 
         /* Tabelas */
@@ -180,16 +184,20 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #1c1813 !important;
         }
 
-        /* Expansores */
-        div[data-testid="stExpander"] details {
+        /* Expansores / Conversas de Regras */
+        div[data-testid="stExpander"] details,
+        .streamlit-expanderContent {
             background-color: #f2ece0 !important;
             border: 1px solid #cfc1a5 !important;
             border-radius: 6px !important;
         }
 
         div[data-testid="stExpander"] summary {
-            color: #1c1813 !important;
-            font-weight: 600;
+            background-color: #eee6d6 !important;
+            color: #6b3f02 !important;
+            font-weight: 700 !important;
+            border-radius: 6px !important;
+            padding: 6px 10px !important;
         }
 
         /* Botões Normais */
@@ -207,18 +215,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             box-shadow: 0 0 8px rgba(138, 93, 20, 0.3) !important;
         }
 
-        /* Botões Ativos / Desabilitados no Histórico */
-        .stButton > button:disabled,
-        .stButton > button[disabled] {
-            background: #ebd8b8 !important;
-            color: #523103 !important;
-            border: 1px solid #8a5d14 !important;
-            font-weight: 700 !important;
-            opacity: 1 !important;
-            cursor: default !important;
-        }
-
-        /* Botões Primários e Botão de Rolar Expressão do Formulário */
+        /* Botões Primários e Botões Ativos no Histórico */
         .stButton > button[kind="primary"],
         .stButton > button[data-testid="baseButton-primary"],
         div[data-testid="stFormSubmitButton"] button,
@@ -227,6 +224,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #ffffff !important;
             border: 1px solid #5a3804 !important;
             font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(138, 93, 20, 0.25) !important;
         }
 
         .stButton > button[kind="primary"]:hover,
@@ -397,7 +395,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
 
         div[data-testid="stChatInput"] textarea {
             background-color: #1a1e27 !important;
-            color: #f1ebd9 !important;
+            color: #ffffff !important;
             border: 1px solid #3d3424 !important;
             border-radius: 8px !important;
         }
@@ -406,16 +404,20 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #e5b967 !important;
         }
 
-        /* Placeholders Nítidos e Fáceis de Enxergar */
+        /* Placeholders Nítidos e Fáceis de Enxergar no Modo Escuro */
         ::placeholder,
         ::-webkit-input-placeholder,
         :-moz-placeholder,
         ::-moz-placeholder,
         :-ms-input-placeholder,
         textarea::placeholder,
-        input::placeholder {
-            color: #9a9488 !important;
+        input::placeholder,
+        div[data-testid="stChatInput"] textarea::placeholder,
+        div[data-testid="stChatInput"] textarea::-webkit-input-placeholder {
+            color: #d0c8b8 !important;
+            -webkit-text-fill-color: #d0c8b8 !important;
             opacity: 1 !important;
+            font-weight: 500 !important;
         }
 
         /* Tabelas */
@@ -456,16 +458,20 @@ def apply_custom_styles(theme_mode: str = "dark"):
             border: 1px solid #3d3424 !important;
         }
 
-        /* Expansores */
-        div[data-testid="stExpander"] details {
-            background-color: #171b22 !important;
+        /* Expansores / Conversas de Regras */
+        div[data-testid="stExpander"] details,
+        .streamlit-expanderContent {
+            background-color: #161a22 !important;
             border: 1px solid #3d3424 !important;
             border-radius: 6px !important;
         }
 
         div[data-testid="stExpander"] summary {
-            color: #e8e3d9 !important;
-            font-weight: 600;
+            background-color: #1c212b !important;
+            color: #e5b967 !important;
+            font-weight: 700 !important;
+            border-radius: 6px !important;
+            padding: 6px 10px !important;
         }
 
         /* Botões Normais */
@@ -483,18 +489,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             box-shadow: 0 0 8px rgba(229, 185, 103, 0.3) !important;
         }
 
-        /* Botões Ativos / Desabilitados no Histórico */
-        .stButton > button:disabled,
-        .stButton > button[disabled] {
-            background: #252b36 !important;
-            color: #e5b967 !important;
-            border: 1px solid #c99a4e !important;
-            font-weight: 700 !important;
-            opacity: 1 !important;
-            cursor: default !important;
-        }
-
-        /* Botões Primários e Botão de Rolar Expressão do Formulário */
+        /* Botões Primários e Botões Ativos no Histórico */
         .stButton > button[kind="primary"],
         .stButton > button[data-testid="baseButton-primary"],
         div[data-testid="stFormSubmitButton"] button,
@@ -503,6 +498,7 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #1a1408 !important;
             border: 1px solid #7c581d !important;
             font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(201, 154, 78, 0.3) !important;
         }
 
         .stButton > button[kind="primary"]:hover,

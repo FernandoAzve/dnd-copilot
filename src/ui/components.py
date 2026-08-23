@@ -89,14 +89,15 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
                         
                         col_btn, col_del = st.columns([4, 1])
                         with col_btn:
-                            btn_label = f"{s['title'][:22]}{badge}"
-                            if st.button(btn_label, key=f"load_sess_{s_id}", use_container_width=True, disabled=is_active):
-                                loaded = load_session(s_id, username=username)
-                                if loaded:
-                                    st.session_state["current_session_id"] = s_id
-                                    st.session_state["messages"] = loaded.get("messages", [])
-                                    agent.update_config(mode=loaded.get("mode"), model_name=loaded.get("model"))
-                                    st.rerun()
+                            btn_label = f"{s['title'][:20]}{badge}"
+                            if st.button(btn_label, key=f"load_sess_{s_id}", use_container_width=True, type="primary" if is_active else "secondary"):
+                                if not is_active:
+                                    loaded = load_session(s_id, username=username)
+                                    if loaded:
+                                        st.session_state["current_session_id"] = s_id
+                                        st.session_state["messages"] = loaded.get("messages", [])
+                                        agent.update_config(mode=loaded.get("mode"), model_name=loaded.get("model"))
+                                        st.rerun()
                         with col_del:
                             if st.button("🗑️", key=f"del_sess_{s_id}", help=f"Excluir '{s['title']}'"):
                                 delete_session(s_id, username=username)
@@ -131,10 +132,11 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
                         
                         col_btn, col_del = st.columns([4, 1])
                         with col_btn:
-                            btn_label = f"{status_icon} {char_name[:16]}{badge}"
-                            if st.button(btn_label, key=f"sel_aud_{a_id}", use_container_width=True, disabled=is_selected):
-                                st.session_state["selected_audit_id"] = a_id
-                                st.rerun()
+                            btn_label = f"{status_icon} {char_name[:14]}{badge}"
+                            if st.button(btn_label, key=f"sel_aud_{a_id}", use_container_width=True, type="primary" if is_selected else "secondary"):
+                                if not is_selected:
+                                    st.session_state["selected_audit_id"] = a_id
+                                    st.rerun()
                         with col_del:
                             if st.button("🗑️", key=f"del_aud_{a_id}", help=f"Excluir ficha de {char_name}"):
                                 delete_audit(a_id, username=username)
