@@ -10,10 +10,11 @@ from ..rag.vector_store import DnDKnowledgeBase
 from .character_calc import calculate_ability_modifier, calculate_proficiency_bonus
 
 MODEL_FALLBACK_CHAIN = [
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-flash-latest",
     "gemini-3.6-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro"
+    "gemini-3-flash-preview"
 ]
 
 CLASS_CANONICAL_DATA = {
@@ -141,9 +142,9 @@ SHEET_AUDITOR_PROMPT = STRICT_SYNTHESIS_PROMPT
 class SheetValidator:
     """Validador de fichas com arquitetura de 3 etapas: Visão -> Python Math -> Grounded RAG."""
 
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.6-flash"):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.5-flash"):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
-        self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+        self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
         self.kb = DnDKnowledgeBase()
         self.client = None
         self._init_client()

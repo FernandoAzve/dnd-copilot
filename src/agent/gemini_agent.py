@@ -18,12 +18,13 @@ from .prompts import get_system_prompt
 
 load_dotenv()
 
-# Ordem de contingência de modelos caso o Google esteja sob alta demanda (503 / 429)
+# Ordem de contingência com modelos ativos de alta cota gratuita
 MODEL_FALLBACK_CHAIN = [
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-flash-latest",
     "gemini-3.6-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro"
+    "gemini-3-flash-preview"
 ]
 
 # Definições de ferramentas para o Google Gemini
@@ -75,9 +76,9 @@ TOOLS_MAP = {
 class DnDAgent:
     """Agente especialista em D&D que integra Gemini (Chat AFC com retry automático e redundância de modelos), RAG e Ferramentas."""
 
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.6-flash", mode: str = "mentor"):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.5-flash", mode: str = "mentor"):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
-        self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+        self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
         self.mode = mode
         self.kb = DnDKnowledgeBase()
         self.chat_session = None
