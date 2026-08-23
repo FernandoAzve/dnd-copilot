@@ -6,23 +6,30 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-AUDIT_DIR = os.path.join(BASE_DIR, "data", "audit_history")
+DEFAULT_AUDIT_DIR = os.path.join(BASE_DIR, "data", "audit_history")
+USERS_ROOT = os.path.join(BASE_DIR, "data", "users")
 
-os.makedirs(AUDIT_DIR, exist_ok=True)
+def _get_audit_dir(username: Optional[str] = None) -> str:
+    """Retorna o diretório de auditoria apropriado (específico do usuário ou global)."""
+    if username and username.strip():
+        user_clean = username.strip().lower()
+        d = os.path.join(USERS_ROOT, user_clean, "audit_history")
+    else:
+        d = DEFAULT_AUDIT_DIR
+    os.makedirs(d, exist_ok=True)
+    return d
 
 def _extract_summary_from_report(report_text: str, filename: str) -> Dict[str, str]:
     """Extrai informações chave do relatório gerado para indexação rápida."""
     char_name = "Personagem Não Identificado"
     char_class = "Classe Desconhecida"
     
-    # Tentar extrair nome do título
     name_match = re.search(r'#+\s*📋?\s*Relatório de Auditoria da Ficha:\s*(.+)', report_text, re.IGNORECASE)
     if name_match:
         char_name = name_match.group(1).strip()
     elif filename:
         char_name = os.path.splitext(filename)[0].replace("_", " ").replace("-", " ")
         
-    # Tentar extrair classe e nível
     class_match = re.search(r'Classe(?:\s*e\s*Subclasse)?\s*[\*:]+\s*([^\n\*\-]+)', report_text, re.IGNORECASE)
     if class_match:
         char_class = class_match.group(1).strip()
@@ -37,16 +44,17 @@ def save_audit(
     report: str,
     user_notes: str = "",
     file_type: str = "pdf",
-    extracted_data: Optional[Dict[str, Any]] = None
+    extracted_data: Optional[Dict[str, Any]] = None,
+    username: Optional[str] = None
 ) -> str:
-    """Salva um relatório de auditoria de ficha no histórico persistente com suporte a mensagens de chat."""
+    """Salva um relatório de auditoria de ficha no histórico persistente do usuário."""
     now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     short_uuid = uuid.uuid4().hex[:6]
     audit_id = f"audit_{now_str}_{short_uuid}"
     now_iso = datetime.now().isoformat()
+    audit_dir = _get_audit_dir(username)
     
     summary = _extract_summary_from_report(report, filename)
-    
     has_errors = "Inconsistências" in report and ("❌" in report or "Incorreto" in report)
     
     initial_messages = [
@@ -59,6 +67,7 @@ def save_audit(
     
     audit_data = {
         "id": audit_id,
+        "username": username or "",
         "filename": filename,
         "character_name": summary["character_name"],
         "class_level": summary["class_level"],
@@ -72,17 +81,24 @@ def save_audit(
         "messages": initial_messages
     }
     
-    file_path = os.path.join(AUDIT_DIR, f"{audit_id}.json")
+    file_path = os.path.join(audit_dir, f"{audit_id}.json")
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(audit_data, f, ensure_ascii=False, indent=2)
         
     return audit_id
 
-def append_audit_message(audit_id: str, role: str, content: str) -> bool:
+def append_audit_message(audit_id: str, role: str, content: str, username: Optional[str] = None) -> bool:
     """Adiciona uma mensagem à conversa contínua sobre a ficha auditada."""
-    file_path = os.path.join(AUDIT_DIR, f"{audit_id}.json")
+    audit_dir = _get_audit_dir(username)
+    file_path = os.path.join(audit_dir, f"{audit_id}.json")
+    
     if not os.path.exists(file_path):
-        return False
+        # Fallback para o diretório padrão
+        fallback = os.path.join(DEFAULT_AUDIT_DIR, f"{audit_id}.json")
+        if os.path.exists(fallback):
+            file_path = fallback
+        else:
+            return False
         
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -105,15 +121,16 @@ def append_audit_message(audit_id: str, role: str, content: str) -> bool:
         print(f"Erro ao adicionar mensagem à auditoria {audit_id}: {e}")
         return False
 
-def list_audits() -> List[Dict[str, Any]]:
-    """Lista todas as auditorias salvas ordenadas da mais recente para a mais antiga."""
-    if not os.path.exists(AUDIT_DIR):
+def list_audits(username: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Lista todas as auditorias salvas do usuário ordenadas da mais recente para a mais antiga."""
+    audit_dir = _get_audit_dir(username)
+    if not os.path.exists(audit_dir):
         return []
         
     audits = []
-    for fname in os.listdir(AUDIT_DIR):
+    for fname in os.listdir(audit_dir):
         if fname.endswith(".json"):
-            file_path = os.path.join(AUDIT_DIR, fname)
+            file_path = os.path.join(audit_dir, fname)
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -135,11 +152,16 @@ def list_audits() -> List[Dict[str, Any]]:
     audits.sort(key=lambda a: a.get("updated_at", a.get("created_at", "")), reverse=True)
     return audits
 
-def get_audit(audit_id: str) -> Optional[Dict[str, Any]]:
+def get_audit(audit_id: str, username: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Recupera os detalhes completos de uma auditoria salva."""
-    file_path = os.path.join(AUDIT_DIR, f"{audit_id}.json")
+    audit_dir = _get_audit_dir(username)
+    file_path = os.path.join(audit_dir, f"{audit_id}.json")
     if not os.path.exists(file_path):
-        return None
+        fallback = os.path.join(DEFAULT_AUDIT_DIR, f"{audit_id}.json")
+        if os.path.exists(fallback):
+            file_path = fallback
+        else:
+            return None
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -147,13 +169,18 @@ def get_audit(audit_id: str) -> Optional[Dict[str, Any]]:
         print(f"Erro ao ler auditoria {audit_id}: {e}")
         return None
 
-def delete_audit(audit_id: str) -> bool:
-    """Exclui uma auditoria do histórico."""
-    file_path = os.path.join(AUDIT_DIR, f"{audit_id}.json")
-    if os.path.exists(file_path):
-        try:
-            os.remove(file_path)
-            return True
-        except Exception:
+def delete_audit(audit_id: str, username: Optional[str] = None) -> bool:
+    """Exclui uma auditoria do histórico do usuário."""
+    audit_dir = _get_audit_dir(username)
+    file_path = os.path.join(audit_dir, f"{audit_id}.json")
+    if not os.path.exists(file_path):
+        fallback = os.path.join(DEFAULT_AUDIT_DIR, f"{audit_id}.json")
+        if os.path.exists(fallback):
+            file_path = fallback
+        else:
             return False
-    return False
+    try:
+        os.remove(file_path)
+        return True
+    except Exception:
+        return False

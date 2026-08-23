@@ -5,22 +5,38 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-CHAT_DIR = os.path.join(BASE_DIR, "data", "chat_history")
+DEFAULT_CHAT_DIR = os.path.join(BASE_DIR, "data", "chat_history")
+USERS_ROOT = os.path.join(BASE_DIR, "data", "users")
 
-os.makedirs(CHAT_DIR, exist_ok=True)
+def _get_chat_dir(username: Optional[str] = None) -> str:
+    """Retorna o diretório de chat apropriado (específico do usuário ou global)."""
+    if username and username.strip():
+        user_clean = username.strip().lower()
+        d = os.path.join(USERS_ROOT, user_clean, "chat_history")
+    else:
+        d = DEFAULT_CHAT_DIR
+    os.makedirs(d, exist_ok=True)
+    return d
 
 def _generate_session_id() -> str:
     now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     short_uuid = uuid.uuid4().hex[:6]
     return f"chat_{now_str}_{short_uuid}"
 
-def create_session(title: str = "Nova Conversa", mode: str = "mentor", model: str = "gemini-3.6-flash") -> str:
+def create_session(
+    title: str = "Nova Conversa",
+    mode: str = "mentor",
+    model: str = "gemini-3.6-flash",
+    username: Optional[str] = None
+) -> str:
     """Cria uma nova sessão de chat persistente e retorna seu ID."""
     session_id = _generate_session_id()
     now_iso = datetime.now().isoformat()
+    chat_dir = _get_chat_dir(username)
     
     initial_data = {
         "id": session_id,
+        "username": username or "",
         "title": title,
         "mode": mode,
         "model": model,
@@ -40,7 +56,7 @@ def create_session(title: str = "Nova Conversa", mode: str = "mentor", model: st
         ]
     }
     
-    file_path = os.path.join(CHAT_DIR, f"{session_id}.json")
+    file_path = os.path.join(chat_dir, f"{session_id}.json")
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(initial_data, f, ensure_ascii=False, indent=2)
         
@@ -51,13 +67,15 @@ def save_session(
     messages: List[Dict[str, Any]],
     title: Optional[str] = None,
     mode: Optional[str] = None,
-    model: Optional[str] = None
+    model: Optional[str] = None,
+    username: Optional[str] = None
 ) -> bool:
     """Salva o estado atual de uma sessão de conversa."""
     if not session_id:
         return False
         
-    file_path = os.path.join(CHAT_DIR, f"{session_id}.json")
+    chat_dir = _get_chat_dir(username)
+    file_path = os.path.join(chat_dir, f"{session_id}.json")
     existing_data = {}
     
     if os.path.exists(file_path):
@@ -81,6 +99,7 @@ def save_session(
 
     data = {
         "id": session_id,
+        "username": username or existing_data.get("username", ""),
         "title": current_title,
         "mode": mode or existing_data.get("mode", "mentor"),
         "model": model or existing_data.get("model", "gemini-3.6-flash"),
@@ -94,11 +113,17 @@ def save_session(
         
     return True
 
-def load_session(session_id: str) -> Optional[Dict[str, Any]]:
+def load_session(session_id: str, username: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Carrega uma sessão específica pelo ID."""
-    file_path = os.path.join(CHAT_DIR, f"{session_id}.json")
+    chat_dir = _get_chat_dir(username)
+    file_path = os.path.join(chat_dir, f"{session_id}.json")
     if not os.path.exists(file_path):
-        return None
+        # Tentar fallback no default se não achar
+        file_path_fallback = os.path.join(DEFAULT_CHAT_DIR, f"{session_id}.json")
+        if os.path.exists(file_path_fallback):
+            file_path = file_path_fallback
+        else:
+            return None
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -106,15 +131,16 @@ def load_session(session_id: str) -> Optional[Dict[str, Any]]:
         print(f"Erro ao carregar sessão {session_id}: {e}")
         return None
 
-def list_sessions() -> List[Dict[str, Any]]:
-    """Lista todas as sessões salvas ordenadas da mais recente para a mais antiga."""
-    if not os.path.exists(CHAT_DIR):
+def list_sessions(username: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Lista todas as sessões salvas do usuário ordenadas da mais recente para a mais antiga."""
+    chat_dir = _get_chat_dir(username)
+    if not os.path.exists(chat_dir):
         return []
         
     sessions = []
-    for fname in os.listdir(CHAT_DIR):
+    for fname in os.listdir(chat_dir):
         if fname.endswith(".json"):
-            file_path = os.path.join(CHAT_DIR, fname)
+            file_path = os.path.join(chat_dir, fname)
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -129,13 +155,13 @@ def list_sessions() -> List[Dict[str, Any]]:
             except Exception as e:
                 print(f"Erro ao ler arquivo {fname}: {e}")
                 
-    # Ordenar por data de atualização decrescente
     sessions.sort(key=lambda s: s.get("updated_at", ""), reverse=True)
     return sessions
 
-def delete_session(session_id: str) -> bool:
+def delete_session(session_id: str, username: Optional[str] = None) -> bool:
     """Exclui uma sessão salva."""
-    file_path = os.path.join(CHAT_DIR, f"{session_id}.json")
+    chat_dir = _get_chat_dir(username)
+    file_path = os.path.join(chat_dir, f"{session_id}.json")
     if os.path.exists(file_path):
         try:
             os.remove(file_path)
@@ -144,14 +170,15 @@ def delete_session(session_id: str) -> bool:
             return False
     return False
 
-def rename_session(session_id: str, new_title: str) -> bool:
+def rename_session(session_id: str, new_title: str, username: Optional[str] = None) -> bool:
     """Renomeia o título de uma sessão."""
-    data = load_session(session_id)
+    data = load_session(session_id, username)
     if not data:
         return False
     data["title"] = new_title
     data["updated_at"] = datetime.now().isoformat()
-    file_path = os.path.join(CHAT_DIR, f"{session_id}.json")
+    chat_dir = _get_chat_dir(username)
+    file_path = os.path.join(chat_dir, f"{session_id}.json")
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return True

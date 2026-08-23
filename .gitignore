@@ -16,13 +16,16 @@ __pycache__/
 .env.*.local
 .streamlit/secrets.toml
 
+# Banco de Dados de Usuários e Pastas Privadas de Usuários
+data/users.db
+data/users.db-journal
+data/users/
+data/.app_secret
+
+
 # Livros PDF Grandes / Direitos Autorais (opcional)
 data/pdf_books/*.pdf
 !data/pdf_books/.gitkeep
-
-# Dados locais de histórico de chat e auditorias (se não quiser compartilhar sessões locais)
-# data/chat_history/*.json
-# data/audit_history/*.json
 
 # Sistema Operacional
 .DS_Store

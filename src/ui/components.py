@@ -14,6 +14,7 @@ from ..storage.chat_storage import (
     delete_session,
     rename_session
 )
+from ..auth.auth_ui import render_user_profile_sidebar
 
 CONDITIONS_LIST = [
     "Agarrado (Grappled)",
@@ -33,25 +34,28 @@ CONDITIONS_LIST = [
     "Surdo (Deafened)"
 ]
 
-def render_sidebar(agent):
-    """Renderiza a barra lateral com histórico de chats, configurações, dados e livros."""
+def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
+    """Renderiza a barra lateral com perfil do usuário, histórico privado, configurações, dados e livros."""
+    username = user_data.get("username") if user_data else None
+    is_admin = user_data.get("is_admin", False) if user_data else True
+
     with st.sidebar:
         st.markdown("## 🧙‍♂️ **Grimório do Sábio**")
         st.caption("Assistente & Mentor de D&D 5e / 2024")
         
-        # 1. Gerenciador de Sessões de Chat
+        # 1. Gerenciador de Sessões de Chat (Privado do Usuário)
         if st.button("➕ **Nova Conversa**", use_container_width=True, type="primary"):
-            new_id = create_session(mode=agent.mode, model=agent.model_name)
+            new_id = create_session(mode=agent.mode, model=agent.model_name, username=username)
             st.session_state["current_session_id"] = new_id
-            session_data = load_session(new_id)
+            session_data = load_session(new_id, username=username)
             if session_data:
                 st.session_state["messages"] = session_data.get("messages", [])
             agent.reset_chat()
             st.rerun()
 
-        # Histórico de Conversas Salvas
+        # Histórico de Conversas Salvas do Usuário
         with st.expander("📜 **Histórico de Conversas**", expanded=False):
-            sessions = list_sessions()
+            sessions = list_sessions(username=username)
             if not sessions:
                 st.caption("Nenhuma conversa salva ainda.")
             else:
@@ -65,7 +69,7 @@ def render_sidebar(agent):
                     with col_btn:
                         btn_label = f"{s['title'][:24]}{badge}"
                         if st.button(btn_label, key=f"load_sess_{s_id}", use_container_width=True, disabled=is_active):
-                            loaded = load_session(s_id)
+                            loaded = load_session(s_id, username=username)
                             if loaded:
                                 st.session_state["current_session_id"] = s_id
                                 st.session_state["messages"] = loaded.get("messages", [])
@@ -73,26 +77,17 @@ def render_sidebar(agent):
                                 st.rerun()
                     with col_del:
                         if st.button("🗑️", key=f"del_sess_{s_id}", help=f"Excluir '{s['title']}'"):
-                            delete_session(s_id)
+                            delete_session(s_id, username=username)
                             if s_id == current_id:
-                                # Se deletou a atual, cria uma nova
-                                new_id = create_session()
+                                new_id = create_session(username=username)
                                 st.session_state["current_session_id"] = new_id
-                                st.session_state["messages"] = load_session(new_id)["messages"]
+                                st.session_state["messages"] = load_session(new_id, username=username)["messages"]
                             st.rerun()
 
         st.divider()
 
-        # 2. Configurações da IA
-        with st.expander("⚙️ **Configurações & Chave API**", expanded=not bool(agent.api_key)):
-            api_key = st.text_input(
-                "Chave Google Gemini:",
-                value=agent.api_key,
-                type="password",
-                placeholder="Insira sua GEMINI_API_KEY",
-                help="Obtenha uma chave gratuita no Google AI Studio (https://aistudio.google.com/app/apikey)"
-            )
-            
+        # 2. Configurações de Atuação da IA
+        with st.expander("⚙️ **Modo de Atuação da IA**", expanded=False):
             mode_options = {
                 "mentor": "🧙‍♂️ Mentor de Iniciantes",
                 "arbitro": "⚔️ Árbitro Rápido de Mesa",
@@ -112,8 +107,8 @@ def render_sidebar(agent):
                 index=0
             )
 
-            if api_key != agent.api_key or selected_mode != agent.mode or model_name != agent.model_name:
-                agent.update_config(api_key=api_key, model_name=model_name, mode=selected_mode)
+            if selected_mode != agent.mode or model_name != agent.model_name:
+                agent.update_config(model_name=model_name, mode=selected_mode)
                 st.success("Configurações atualizadas!")
 
         st.divider()
@@ -166,62 +161,86 @@ def render_sidebar(agent):
 
         st.divider()
 
-        # 5. Ingestão e Biblioteca de Livros (PDFs)
+        # 5. Ingestão e Biblioteca de Livros (PDFs) com Controle de Acesso (RBAC)
         with st.expander("📚 **Biblioteca de Livros (PDFs)**", expanded=False):
-            st.caption("Gerencie os manuais e suplementos de D&D indexados na memória.")
+            st.caption("Manuais e suplementos de D&D indexados na memória compartilhada.")
             
             os.makedirs(PDF_DIR, exist_ok=True)
             existing_pdfs = [f for f in os.listdir(PDF_DIR) if f.lower().endswith(".pdf")]
             
             if existing_pdfs:
-                st.markdown("**Livros disponíveis:**")
+                st.markdown("**Livros disponíveis no sistema:**")
                 for p in existing_pdfs:
                     file_size_mb = os.path.getsize(os.path.join(PDF_DIR, p)) / (1024 * 1024)
                     st.markdown(f"📖 `{p}` ({file_size_mb:.1f} MB)")
-                
-                # Exclusão de livros
-                book_to_delete = st.selectbox("Excluir livro:", options=["-- Selecione --"] + existing_pdfs, key="sel_del_book")
-                if book_to_delete and book_to_delete != "-- Selecione --":
-                    if st.button(f"🗑️ Excluir '{book_to_delete}'", type="secondary", use_container_width=True):
-                        del_res = delete_pdf_book(book_to_delete)
-                        if del_res["success"]:
-                            st.success(del_res["message"])
-                            agent.kb = DnDKnowledgeBase()
-                            st.rerun()
-                        else:
-                            st.error(del_res["message"])
             else:
                 st.info("Nenhum livro PDF encontrado em `data/pdf_books/`.")
 
-            st.markdown("---")
-            st.markdown("**Adicionar novo livro:**")
-            
-            if "processed_upload_names" not in st.session_state:
-                st.session_state["processed_upload_names"] = set()
+            # Controle Exclusivo para Mestre / Administrador
+            if is_admin:
+                st.markdown("---")
+                st.markdown("👑 **Gerenciamento do Mestre:**")
+                
+                # Exclusão de livros
+                if existing_pdfs:
+                    book_to_delete = st.selectbox("Excluir livro:", options=["-- Selecione --"] + existing_pdfs, key="sel_del_book")
+                    if book_to_delete and book_to_delete != "-- Selecione --":
+                        if st.button(f"🗑️ Excluir '{book_to_delete}'", type="secondary", use_container_width=True):
+                            del_res = delete_pdf_book(book_to_delete)
+                            if del_res["success"]:
+                                st.success(del_res["message"])
+                                agent.kb = DnDKnowledgeBase()
+                                st.rerun()
+                            else:
+                                st.error(del_res["message"])
 
-            uploaded_files = st.file_uploader(
-                "Selecione um PDF:",
-                type=["pdf"],
-                accept_multiple_files=True,
-                key="pdf_file_uploader",
-                help="Faça upload do Livro do Jogador, Livro do Mestre, etc."
-            )
-            
-            new_files_to_save = []
-            if uploaded_files:
-                for up_file in uploaded_files:
-                    if up_file.name not in st.session_state["processed_upload_names"]:
-                        new_files_to_save.append(up_file)
+                st.markdown("**Adicionar novo livro (PDF):**")
+                if "processed_upload_names" not in st.session_state:
+                    st.session_state["processed_upload_names"] = set()
 
-            if new_files_to_save:
-                if st.button(f"📥 Salvar e Indexar {len(new_files_to_save)} Livro(s)", use_container_width=True):
-                    for up_file in new_files_to_save:
-                        save_path = os.path.join(PDF_DIR, up_file.name)
-                        with open(save_path, "wb") as f:
-                            f.write(up_file.getbuffer())
-                        st.session_state["processed_upload_names"].add(up_file.name)
-                    
-                    prog_bar = st.progress(0, text="Lendo páginas do livro...")
+                uploaded_files = st.file_uploader(
+                    "Selecione um PDF:",
+                    type=["pdf"],
+                    accept_multiple_files=True,
+                    key="pdf_file_uploader",
+                    help="Faça upload do Livro do Jogador, Livro do Mestre, etc."
+                )
+                
+                new_files_to_save = []
+                if uploaded_files:
+                    for up_file in uploaded_files:
+                        if up_file.name not in st.session_state["processed_upload_names"]:
+                            new_files_to_save.append(up_file)
+
+                if new_files_to_save:
+                    if st.button(f"📥 Salvar e Indexar {len(new_files_to_save)} Livro(s)", use_container_width=True):
+                        for up_file in new_files_to_save:
+                            save_path = os.path.join(PDF_DIR, up_file.name)
+                            with open(save_path, "wb") as f:
+                                f.write(up_file.getbuffer())
+                            st.session_state["processed_upload_names"].add(up_file.name)
+                        
+                        prog_bar = st.progress(0, text="Lendo páginas do livro...")
+                        status_text = st.empty()
+                        
+                        def ui_progress(curr, total, name):
+                            pct = int((curr / total) * 100)
+                            prog_bar.progress(pct, text=f"Lendo {name}: pág. {curr}/{total} ({pct}%)")
+                            status_text.caption(f"⚡ Extraindo página {curr} de {total}...")
+                            
+                        res = ingest_all_pdfs(ui_progress)
+                        status_text.empty()
+                        prog_bar.empty()
+                        
+                        if res["success"]:
+                            st.success(res["message"])
+                            agent.kb = DnDKnowledgeBase()
+                            st.rerun()
+                        else:
+                            st.warning(res["message"])
+
+                elif st.button("⚡ Re-indexar Livros Existentes", use_container_width=True):
+                    prog_bar = st.progress(0, text="Iniciando re-indexação...")
                     status_text = st.empty()
                     
                     def ui_progress(curr, total, name):
@@ -239,26 +258,12 @@ def render_sidebar(agent):
                         st.rerun()
                     else:
                         st.warning(res["message"])
+            else:
+                st.caption("🛡️ *Apenas o Mestre Administrador pode adicionar ou remover livros da biblioteca.*")
 
-            elif st.button("⚡ Re-indexar Livros Existentes", use_container_width=True):
-                prog_bar = st.progress(0, text="Iniciando re-indexação...")
-                status_text = st.empty()
-                
-                def ui_progress(curr, total, name):
-                    pct = int((curr / total) * 100)
-                    prog_bar.progress(pct, text=f"Lendo {name}: pág. {curr}/{total} ({pct}%)")
-                    status_text.caption(f"⚡ Extraindo página {curr} de {total}...")
-                    
-                res = ingest_all_pdfs(ui_progress)
-                status_text.empty()
-                prog_bar.empty()
-                
-                if res["success"]:
-                    st.success(res["message"])
-                    agent.kb = DnDKnowledgeBase()
-                    st.rerun()
-                else:
-                    st.warning(res["message"])
+        # 6. Painel de Perfil e Logout
+        if user_data:
+            render_user_profile_sidebar(user_data, agent)
 
 def render_chat_message(role: str, content: str, tool_logs: Optional[List[Dict[str, Any]]] = None):
     """Renderiza uma mensagem de chat com visual temático."""

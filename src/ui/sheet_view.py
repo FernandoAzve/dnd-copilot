@@ -3,6 +3,7 @@ import os
 import json
 from PIL import Image
 import io
+from typing import Optional
 from ..tools.sheet_validator import SheetValidator
 from ..storage.audit_storage import (
     save_audit,
@@ -13,13 +14,13 @@ from ..storage.audit_storage import (
 )
 from .components import render_chat_message
 
-def render_sheet_auditor_tab(agent):
+def render_sheet_auditor_tab(agent, username: Optional[str] = None):
     """
-    Renderiza o Auditor de Fichas em layout Master-Detail (Painel Duplo):
-    - Coluna Esquerda: Lista de Fichas Auditadas (Histórico) + Botão de Nova Auditoria
+    Renderiza o Auditor de Fichas em layout Master-Detail (Painel Duplo) com isolamento por usuário:
+    - Coluna Esquerda: Lista de Fichas Auditadas (Histórico do usuário) + Botão de Nova Auditoria
     - Coluna Direita: Painel Interativo de Chat, Diagnóstico e Ações da Ficha Selecionada
     """
-    all_audits = list_audits()
+    all_audits = list_audits(username=username)
     
     # Inicializar seleção padrão
     if "selected_audit_id" not in st.session_state:
@@ -78,9 +79,9 @@ def render_sheet_auditor_tab(agent):
                         st.rerun()
                 with col_c2:
                     if st.button("🗑️", key=f"del_left_{a_id}", help=f"Excluir {char_name}"):
-                        delete_audit(a_id)
+                        delete_audit(a_id, username=username)
                         if st.session_state.get("selected_audit_id") == a_id:
-                            remaining = list_audits()
+                            remaining = list_audits(username=username)
                             st.session_state["selected_audit_id"] = remaining[0]["id"] if remaining else "nova"
                         st.rerun()
         else:
@@ -148,7 +149,8 @@ def render_sheet_auditor_tab(agent):
                             report=result["report"],
                             user_notes=user_notes,
                             file_type="pdf" if uploaded_sheet.name.lower().endswith(".pdf") else "image",
-                            extracted_data=result.get("extracted_data")
+                            extracted_data=result.get("extracted_data"),
+                            username=username
                         )
                         st.session_state["selected_audit_id"] = audit_id
                         st.success("✅ Ficha auditada com sucesso!")
@@ -159,7 +161,7 @@ def render_sheet_auditor_tab(agent):
         # 2. TELA DE CHAT CONTÍNUO & RELATÓRIO DA FICHA SELECIONADA
         else:
             audit_id = st.session_state["selected_audit_id"]
-            audit_data = get_audit(audit_id)
+            audit_data = get_audit(audit_id, username=username)
             
             if not audit_data:
                 st.session_state["selected_audit_id"] = "nova"
@@ -193,8 +195,8 @@ def render_sheet_auditor_tab(agent):
             # Input de chat exclusivo desta ficha
             sheet_query = st.chat_input(f"Pergunte algo sobre {char_name} (ex: dano de ataque, regras 2024, talentos)...", key="sheet_active_chat_input")
             if sheet_query:
-                # 1. Salvar mensagem do usuário
-                append_audit_message(audit_id, "user", sheet_query)
+                # 1. Salvar mensagem do usuário no diretório isolado
+                append_audit_message(audit_id, "user", sheet_query, username=username)
                 
                 # 2. Consultar Gemini com contexto estrito da ficha e livros
                 with st.spinner(f"Consultando os tomos de regras sobre {char_name}..."):
@@ -212,5 +214,5 @@ def render_sheet_auditor_tab(agent):
                     bot_text = response_data.get("text", "Não obtive resposta.")
 
                 # 3. Salvar resposta da IA no histórico da ficha
-                append_audit_message(audit_id, "model", bot_text)
+                append_audit_message(audit_id, "model", bot_text, username=username)
                 st.rerun()
