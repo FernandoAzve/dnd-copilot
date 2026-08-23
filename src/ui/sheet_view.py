@@ -57,35 +57,35 @@ def render_sheet_auditor_tab(agent, username: Optional[str] = None):
 
         audit_btn = st.button("🚀 Iniciar Auditoria e Conversa com a Ficha", use_container_width=True, type="primary")
 
-            if audit_btn:
-                if not uploaded_sheet:
-                    st.warning("Selecione um arquivo de ficha antes de iniciar a auditoria.")
-                else:
-                    with st.spinner("🧙‍♂️ Executando auditoria determinística com RAG dos livros e visão computacional..."):
-                        validator = SheetValidator(api_key=agent.api_key, model_name=agent.model_name)
-                        file_bytes = uploaded_sheet.getvalue()
-                        
-                        result = validator.validate_sheet_file(
-                            file_bytes=file_bytes,
-                            filename=uploaded_sheet.name,
-                            mime_type=uploaded_sheet.type,
-                            notes=user_notes
-                        )
+        if audit_btn:
+            if not uploaded_sheet:
+                st.warning("Selecione um arquivo de ficha antes de iniciar a auditoria.")
+            else:
+                with st.spinner("🧙‍♂️ Executando auditoria determinística com RAG dos livros e visão computacional..."):
+                    validator = SheetValidator(api_key=agent.api_key, model_name=agent.model_name)
+                    file_bytes = uploaded_sheet.getvalue()
+                    
+                    result = validator.validate_sheet_file(
+                        file_bytes=file_bytes,
+                        filename=uploaded_sheet.name,
+                        mime_type=uploaded_sheet.type,
+                        notes=user_notes
+                    )
 
-                    if result["success"]:
-                        audit_id = save_audit(
-                            filename=uploaded_sheet.name,
-                            report=result["report"],
-                            user_notes=user_notes,
-                            file_type="pdf" if uploaded_sheet.name.lower().endswith(".pdf") else "image",
-                            extracted_data=result.get("extracted_data"),
-                            username=username
-                        )
-                        st.session_state["selected_audit_id"] = audit_id
-                        st.success("✅ Ficha auditada com sucesso!")
-                        st.rerun()
-                    else:
-                        st.error(result["report"])
+                if result["success"]:
+                    audit_id = save_audit(
+                        filename=uploaded_sheet.name,
+                        report=result["report"],
+                        user_notes=user_notes,
+                        file_type="pdf" if uploaded_sheet.name.lower().endswith(".pdf") else "image",
+                        extracted_data=result.get("extracted_data"),
+                        username=username
+                    )
+                    st.session_state["selected_audit_id"] = audit_id
+                    st.success("✅ Ficha auditada com sucesso!")
+                    st.rerun()
+                else:
+                    st.error(result["report"])
 
     # =======================================================
     # 2. TELA DE CHAT CONTÍNUO & RELATÓRIO DA FICHA SELECIONADA
