@@ -3,7 +3,8 @@ import streamlit as st
 def apply_custom_styles(theme_mode: str = "dark"):
     """
     Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), garantindo placeholders 100% nítidos, brilhantes e legíveis.
+    e Modo Claro (Pergaminho Arcano), com layout horizontal perfeito para o chat input
+    e placeholders nítidos e de alto contraste.
     """
     is_light = (theme_mode == "light")
 
@@ -102,47 +103,59 @@ def apply_custom_styles(theme_mode: str = "dark"):
             box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
 
-        /* Chat Input e Todos os seus Wrappers BaseWeb */
-        div[data-testid="stChatInput"],
-        div[data-testid="stChatInput"] > div,
-        div[data-testid="stChatInput"] [data-baseweb="base-input"],
-        div[data-testid="stChatInput"] [data-baseweb="textarea"],
-        div[data-testid="stChatFloatingInputContainer"],
-        .stChatFloatingInputContainer {
+        /* Chat Input Horizontal Perfeito */
+        div[data-testid="stChatInput"] {
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        div[data-testid="stChatInput"] > div {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
             background-color: #ffffff !important;
-            background: #ffffff !important;
-            border-color: #c4b595 !important;
+            border: 1px solid #c4b595 !important;
+            border-radius: 10px !important;
+            padding: 4px 10px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        div[data-testid="stChatInput"] [data-baseweb="base-input"],
+        div[data-testid="stChatInput"] [data-baseweb="textarea"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            flex: 1 1 auto !important;
         }
 
         div[data-testid="stChatInput"] textarea {
-            background-color: #ffffff !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
             color: #1c1813 !important;
-            border: 1px solid #c4b595 !important;
-            border-radius: 8px !important;
+            -webkit-text-fill-color: #1c1813 !important;
+            resize: none !important;
+            outline: none !important;
             font-size: 0.95rem !important;
         }
 
         div[data-testid="stChatInput"] button {
+            background: transparent !important;
+            border: none !important;
             color: #8a5d14 !important;
+            flex: 0 0 auto !important;
+            margin-left: 6px !important;
         }
 
         /* Placeholders Nítidos no Modo Claro */
-        ::placeholder,
-        ::-webkit-input-placeholder,
-        :-moz-placeholder,
-        ::-moz-placeholder,
-        :-ms-input-placeholder,
-        textarea::placeholder,
-        input::placeholder,
         div[data-testid="stChatInput"] textarea::placeholder,
         div[data-testid="stChatInput"] textarea::-webkit-input-placeholder,
-        div[data-baseweb="textarea"] textarea::placeholder,
-        div[data-baseweb="base-input"] input::placeholder {
-            color: #2b241a !important;
-            -webkit-text-fill-color: #2b241a !important;
-            opacity: 0.85 !important;
+        textarea::placeholder,
+        input::placeholder {
+            color: #4a4030 !important;
+            -webkit-text-fill-color: #4a4030 !important;
+            opacity: 1 !important;
             font-weight: 500 !important;
-            font-size: 0.95rem !important;
         }
 
         /* Tabelas */
@@ -384,47 +397,59 @@ def apply_custom_styles(theme_mode: str = "dark"):
             color: #e8e3d9 !important;
         }
 
-        /* Chat Input e Todos os seus Wrappers BaseWeb */
-        div[data-testid="stChatInput"],
-        div[data-testid="stChatInput"] > div,
-        div[data-testid="stChatInput"] [data-baseweb="base-input"],
-        div[data-testid="stChatInput"] [data-baseweb="textarea"],
-        div[data-testid="stChatFloatingInputContainer"],
-        .stChatFloatingInputContainer {
+        /* Chat Input Horizontal Perfeito */
+        div[data-testid="stChatInput"] {
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        div[data-testid="stChatInput"] > div {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
             background-color: #1a1e27 !important;
-            background: #1a1e27 !important;
-            border-color: #3d3424 !important;
+            border: 1px solid #3d3424 !important;
+            border-radius: 10px !important;
+            padding: 4px 10px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        div[data-testid="stChatInput"] [data-baseweb="base-input"],
+        div[data-testid="stChatInput"] [data-baseweb="textarea"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            flex: 1 1 auto !important;
         }
 
         div[data-testid="stChatInput"] textarea {
-            background-color: #1a1e27 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
             color: #ffffff !important;
-            border: 1px solid #3d3424 !important;
-            border-radius: 8px !important;
+            -webkit-text-fill-color: #ffffff !important;
+            resize: none !important;
+            outline: none !important;
             font-size: 0.95rem !important;
         }
 
         div[data-testid="stChatInput"] button {
+            background: transparent !important;
+            border: none !important;
             color: #e5b967 !important;
+            flex: 0 0 auto !important;
+            margin-left: 6px !important;
         }
 
         /* Placeholders Nítidos e de Alto Contraste no Modo Escuro */
-        ::placeholder,
-        ::-webkit-input-placeholder,
-        :-moz-placeholder,
-        ::-moz-placeholder,
-        :-ms-input-placeholder,
-        textarea::placeholder,
-        input::placeholder,
         div[data-testid="stChatInput"] textarea::placeholder,
         div[data-testid="stChatInput"] textarea::-webkit-input-placeholder,
-        div[data-baseweb="textarea"] textarea::placeholder,
-        div[data-baseweb="base-input"] input::placeholder {
-            color: #ffffff !important;
-            -webkit-text-fill-color: #ffffff !important;
-            opacity: 0.9 !important;
+        textarea::placeholder,
+        input::placeholder {
+            color: #e0dcd2 !important;
+            -webkit-text-fill-color: #e0dcd2 !important;
+            opacity: 1 !important;
             font-weight: 500 !important;
-            font-size: 0.95rem !important;
         }
 
         /* Tabelas */
