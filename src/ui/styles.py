@@ -3,8 +3,7 @@ import streamlit as st
 def apply_custom_styles(theme_mode: str = "dark"):
     """
     Aplica estilo visual temático de RPG com suporte completo a Modo Escuro (Grimório)
-    e Modo Claro (Pergaminho Arcano), com layout horizontal perfeito para o chat input
-    e placeholders nítidos e de alto contraste.
+    e Modo Claro (Pergaminho Arcano), incluindo estilização temática para o upload de arquivos (PDFs e fotos).
     """
     is_light = (theme_mode == "light")
 
@@ -156,6 +155,39 @@ def apply_custom_styles(theme_mode: str = "dark"):
             -webkit-text-fill-color: #4a4030 !important;
             opacity: 1 !important;
             font-weight: 500 !important;
+        }
+
+        /* File Uploader Temático (Upload de Livros e Fichas) */
+        div[data-testid="stFileUploader"] section,
+        section[data-testid="stFileUploadDropzone"],
+        div[data-testid="stFileUploaderDropzone"],
+        div[data-testid="stFileUploader"] {
+            background-color: #f2ece0 !important;
+            border: 1px dashed #c4b595 !important;
+            border-radius: 8px !important;
+            color: #1c1813 !important;
+        }
+
+        div[data-testid="stFileUploader"] section * {
+            color: #1c1813 !important;
+        }
+
+        div[data-testid="stFileUploader"] small,
+        section[data-testid="stFileUploadDropzone"] small {
+            color: #4e4436 !important;
+        }
+
+        div[data-testid="stFileUploader"] button {
+            background: linear-gradient(180deg, #ffffff 0%, #eee6d6 100%) !important;
+            color: #1c1813 !important;
+            border: 1px solid #c9b999 !important;
+        }
+
+        div[data-testid="stFileUploaderFileData"] {
+            background-color: #ffffff !important;
+            color: #1c1813 !important;
+            border: 1px solid #cfc1a5 !important;
+            border-radius: 6px !important;
         }
 
         /* Tabelas */
@@ -450,6 +482,44 @@ def apply_custom_styles(theme_mode: str = "dark"):
             -webkit-text-fill-color: #e0dcd2 !important;
             opacity: 1 !important;
             font-weight: 500 !important;
+        }
+
+        /* File Uploader Temático no Modo Escuro */
+        div[data-testid="stFileUploader"] section,
+        section[data-testid="stFileUploadDropzone"],
+        div[data-testid="stFileUploaderDropzone"],
+        div[data-testid="stFileUploader"] {
+            background-color: #171b22 !important;
+            border: 1px dashed #c99a4e !important;
+            border-radius: 8px !important;
+            color: #e8e3d9 !important;
+        }
+
+        div[data-testid="stFileUploader"] section * {
+            color: #e8e3d9 !important;
+        }
+
+        div[data-testid="stFileUploader"] small,
+        section[data-testid="stFileUploadDropzone"] small {
+            color: #a09a8f !important;
+        }
+
+        div[data-testid="stFileUploader"] button {
+            background: linear-gradient(180deg, #282f3c 0%, #191e27 100%) !important;
+            color: #f1ebd9 !important;
+            border: 1px solid #3d3424 !important;
+        }
+
+        div[data-testid="stFileUploader"] button:hover {
+            background: linear-gradient(180deg, #374154 0%, #232a36 100%) !important;
+            border-color: #e5b967 !important;
+        }
+
+        div[data-testid="stFileUploaderFileData"] {
+            background-color: #1a1e27 !important;
+            color: #e8e3d9 !important;
+            border: 1px solid #3d3424 !important;
+            border-radius: 6px !important;
         }
 
         /* Tabelas */
