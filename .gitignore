@@ -27,6 +27,12 @@ data/.app_secret
 data/pdf_books/*.pdf
 !data/pdf_books/.gitkeep
 
+# Históricos locais (opcional)
+data/chat_history/*.json
+!data/chat_history/.gitkeep
+data/audit_history/*.json
+!data/audit_history/.gitkeep
+
 # Sistema Operacional
 .DS_Store
 Thumbs.db

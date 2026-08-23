@@ -43,7 +43,7 @@ def test_cryptography_hashing_and_encryption():
     assert verify_password("SenhaErrada", pwd_hash, salt) is False
 
     # 2. Teste de Criptografia de Chave de API
-    raw_key = "AIzaSyDummyKeyForTestingDND12345"
+    raw_key = "dummy_test_gemini_key_12345"
     encrypted = encrypt_api_key(raw_key)
     assert encrypted != raw_key
     assert len(encrypted) > len(raw_key)
