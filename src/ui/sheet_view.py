@@ -27,37 +27,35 @@ def render_sheet_auditor_tab(agent, username: Optional[str] = None):
     # 1. TELA DE NOVA AUDITORIA (CARD CENTRALIZADO E ELEGANTE)
     # =======================================================
     if st.session_state["selected_audit_id"] == "nova":
-        col_c1, col_c2, col_c3 = st.columns([1, 4, 1])
-        with col_c2:
-            st.markdown("### 📋 **Nova Auditoria de Ficha**")
-            st.markdown(
-                "Envie uma **foto de uma ficha física de papel** (mesmo manuscrita) ou um **arquivo PDF digital**. "
-                "O Grimório usará visão computacional combinada com os **livros oficiais indexados** para verificar cálculos e regras de D&D 2024, "
-                "citando as páginas exatas."
-            )
-            st.divider()
+        st.markdown("### 📋 **Nova Auditoria de Ficha**")
+        st.markdown(
+            "Envie uma **foto de uma ficha física de papel** (mesmo manuscrita) ou um **arquivo PDF digital**. "
+            "O Grimório usará visão computacional combinada com os **livros oficiais indexados** para verificar cálculos e regras de D&D 2024, "
+            "citando as páginas exatas."
+        )
+        st.divider()
 
-            uploaded_sheet = st.file_uploader(
-                "Selecione o arquivo da ficha (PDF ou Imagem):",
-                type=["pdf", "png", "jpg", "jpeg", "webp"],
-                key="uploader_single_view",
-                help="Aceita fotos nítidas ou PDFs preenchíveis"
-            )
+        uploaded_sheet = st.file_uploader(
+            "Selecione o arquivo da ficha (PDF ou Imagem):",
+            type=["pdf", "png", "jpg", "jpeg", "webp"],
+            key="uploader_single_view",
+            help="Aceita fotos nítidas ou PDFs preenchíveis"
+        )
 
-            if uploaded_sheet:
-                ext = os.path.splitext(uploaded_sheet.name)[1].lower()
-                if ext in [".png", ".jpg", ".jpeg", ".webp"]:
-                    st.image(uploaded_sheet, caption=f"Prévia: {uploaded_sheet.name}", use_container_width=True)
-                else:
-                    st.info(f"📄 Arquivo PDF Selecionado: **{uploaded_sheet.name}** ({uploaded_sheet.size / 1024:.1f} KB)")
+        if uploaded_sheet:
+            ext = os.path.splitext(uploaded_sheet.name)[1].lower()
+            if ext in [".png", ".jpg", ".jpeg", ".webp"]:
+                st.image(uploaded_sheet, caption=f"Prévia: {uploaded_sheet.name}", use_container_width=True)
+            else:
+                st.info(f"📄 Arquivo PDF Selecionado: **{uploaded_sheet.name}** ({uploaded_sheet.size / 1024:.1f} KB)")
 
-            user_notes = st.text_area(
-                "Observações adicionais sobre o personagem (opcional):",
-                placeholder="Ex: 'Guerreiro nível 5 Campeão', 'Personagem criado com regras de 2024'",
-                key="notes_single_view"
-            )
+        user_notes = st.text_area(
+            "Observações adicionais sobre o personagem (opcional):",
+            placeholder="Ex: 'Guerreiro nível 5 Campeão', 'Personagem criado com regras de 2024'",
+            key="notes_single_view"
+        )
 
-            audit_btn = st.button("🚀 Iniciar Auditoria e Conversa com a Ficha", use_container_width=True, type="primary")
+        audit_btn = st.button("🚀 Iniciar Auditoria e Conversa com a Ficha", use_container_width=True, type="primary")
 
             if audit_btn:
                 if not uploaded_sheet:

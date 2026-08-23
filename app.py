@@ -79,15 +79,29 @@ if "messages" not in st.session_state or not st.session_state.messages:
 # 3. RENDERIZAR BARRA LATERAL COM DADOS DO USUÁRIO E PERMISSÕES RBAC
 render_sidebar(st.session_state.agent, user_data=user_data)
 
-# 4. CABEÇALHO PRINCIPAL
-col_title, col_badge = st.columns([3, 1])
-with col_title:
-    st.markdown("# 🐉 Grimório do Mestre & Mentor D&D")
-    st.markdown("##### *Seu assistente inteligente de regras, combate, auditoria de fichas e aprendizado*")
-with col_badge:
-    is_admin = user_data.get("is_admin", False)
-    badge_label = "👑 Mestre Administrador" if is_admin else "⚔️ Jogador"
-    st.info(f"**Conectado:** {user_data.get('name', username)}\n\n*{badge_label}*")
+# 4. CABEÇALHO PRINCIPAL TEMÁTICO E RESPONSIVO
+is_admin = user_data.get("is_admin", False)
+badge_label = "👑 Mestre Administrador" if is_admin else "⚔️ Jogador"
+display_name = user_data.get("name") or username
+
+st.markdown(
+    f"""
+    <div class="app-header-container">
+        <div class="app-header-titles">
+            <h1 class="app-header-title">🐉 Grimório do Mestre & Mentor D&D</h1>
+            <p class="app-header-subtitle">Seu assistente inteligente de regras, combate, auditoria de fichas e aprendizado</p>
+        </div>
+        <div class="user-profile-pill">
+            <div class="user-profile-avatar">👤</div>
+            <div class="user-profile-info">
+                <span class="user-profile-name">{display_name}</span>
+                <span class="user-profile-role">{badge_label}</span>
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Alerta caso o usuário ainda não tenha configurado sua chave Gemini
 if not st.session_state.agent.api_key:
@@ -96,26 +110,21 @@ if not st.session_state.agent.api_key:
         "Para ativar as respostas completas da IA e a visão computacional de fichas, adicione sua chave gratuita na barra lateral esquerda (menu **'Minha Chave Gemini'**)."
     )
 
-st.divider()
-
-st.divider()
-
 # 5. VISUALIZAÇÕES
 if st.session_state["main_view"] == "chat":
-    # Sugestões Rápidas de Perguntas (Chips)
+    # Sugestões Rápidas de Perguntas (Grid 2x2 Responsivo)
     st.markdown("**Perguntas Frequentes & Exemplos Rápidos:**")
-    chip_cols = st.columns(4)
-    suggested_prompts = [
-        "Como calculo o bônus de ataque do meu personagem?",
-        "Como funciona a magia Bola de Fogo?",
-        "O que mudou em Poção de Cura em 2024?",
-        "Como funciona a Concentração ao tomar dano?"
-    ]
-
-    for idx, prompt_text in enumerate(suggested_prompts):
-        with chip_cols[idx]:
-            if st.button(f"💬 {prompt_text}", key=f"chip_{idx}", use_container_width=True):
-                st.session_state["pending_prompt"] = prompt_text
+    col_chip1, col_chip2 = st.columns(2)
+    with col_chip1:
+        if st.button("💬 Como calculo o bônus de ataque do meu personagem?", key="chip_0", use_container_width=True):
+            st.session_state["pending_prompt"] = "Como calculo o bônus de ataque do meu personagem?"
+        if st.button("💬 O que mudou em Poção de Cura em 2024?", key="chip_2", use_container_width=True):
+            st.session_state["pending_prompt"] = "O que mudou em Poção de Cura em 2024?"
+    with col_chip2:
+        if st.button("💬 Como funciona a magia Bola de Fogo?", key="chip_1", use_container_width=True):
+            st.session_state["pending_prompt"] = "Como funciona a magia Bola de Fogo?"
+        if st.button("💬 Como funciona a Concentração ao tomar dano?", key="chip_3", use_container_width=True):
+            st.session_state["pending_prompt"] = "Como funciona a Concentração ao tomar dano?"
 
     # Renderizar Histórico de Mensagens da Sessão Ativa
     for msg in st.session_state.messages:
