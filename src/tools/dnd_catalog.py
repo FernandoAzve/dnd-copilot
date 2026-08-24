@@ -798,11 +798,37 @@ def get_spells_list(level_filter: Optional[int] = None) -> List[str]:
         return [f"{s['name_pt']} ({s['name_en']})" for s in SPELLS_CATALOG if s["level"] == level_filter]
     return [f"{s['name_pt']} ({s['name_en']}) - Nível {s['level']}" for s in SPELLS_CATALOG]
 
-def get_cantrips_list() -> List[str]:
+def get_cantrips_list(class_filter: Optional[str] = None) -> List[str]:
+    if class_filter and class_filter.strip():
+        cf = class_filter.strip()
+        filtered = [s for s in SPELLS_CATALOG if s["level"] == 0 and cf in s.get("classes", [])]
+        if filtered:
+            return [f"{s['name_pt']} ({s['name_en']})" for s in filtered]
     return [f"{s['name_pt']} ({s['name_en']})" for s in SPELLS_CATALOG if s["level"] == 0]
 
-def get_leveled_spells_list() -> List[str]:
-    return [f"{s['name_pt']} ({s['name_en']}) - Nível {s['level']}" for s in SPELLS_CATALOG if s["level"] > 0]
+def get_leveled_spells_list(class_filter: Optional[str] = None, max_level: int = 9) -> List[str]:
+    if class_filter and class_filter.strip():
+        cf = class_filter.strip()
+        filtered = [s for s in SPELLS_CATALOG if 1 <= s["level"] <= max_level and cf in s.get("classes", [])]
+        if filtered:
+            return [f"{s['name_pt']} ({s['name_en']}) - Nível {s['level']} ({s['school']})" for s in filtered]
+    return [f"{s['name_pt']} ({s['name_en']}) - Nível {s['level']} ({s['school']})" for s in SPELLS_CATALOG if s["level"] > 0]
+
+def is_spellcaster_class(class_name: str, subclass_name: str = "") -> bool:
+    if class_name in ["Mago", "Clérigo", "Druida", "Bardo", "Bruxo", "Feiticeiro", "Paladino", "Guardião"]:
+        return True
+    if "Cavaleiro Arcano" in subclass_name or "Trapaceiro Arcano" in subclass_name:
+        return True
+    return False
+
+def get_class_default_spell_ability(class_name: str) -> str:
+    return CLASSES_2024.get(class_name, {}).get("spell_ability", "None")
+
+def get_background_details(background_name: str) -> Dict[str, Any]:
+    return BACKGROUNDS_2024.get(background_name, {})
+
+def get_species_details(species_name: str) -> Dict[str, Any]:
+    return SPECIES_2024.get(species_name, {})
 
 def get_feats_list() -> List[str]:
     return [f"{f['name']} — {f['description'][:60]}..." for f in FEATS_2024]
