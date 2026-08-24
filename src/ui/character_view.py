@@ -389,28 +389,31 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             with col_item1:
                 # Multiselect de Itens Mágicos
                 all_magic_items_preset = get_magic_items_list()
-                current_magic_items = [i for i in form_data.get("magic_items", []) if any(i in p for p in all_magic_items_preset)]
+                curr_items = form_data.get("magic_items", [])
+                def_items = [p for p in all_magic_items_preset if any(item.lower() in p.lower() for item in curr_items)]
                 selected_magic_items = st.multiselect(
                     "Itens Mágicos Canônicos (D&D 2024):",
                     options=all_magic_items_preset,
-                    default=selected_magic_items_preset if (selected_magic_items_preset := [p for p in all_magic_items_preset if any(item in p for item in form_data.get("magic_items", []))]) else None
+                    default=def_items
                 )
                 magic_items_custom = st.text_area(
                     "Outros Itens Mágicos / Customizados (um por linha):",
-                    value="\n".join([i for i in form_data.get("magic_items", []) if not any(i in p for p in all_magic_items_preset)])
+                    value="\n".join([i for i in curr_items if not any(i.lower() in p.lower() for p in all_magic_items_preset)])
                 )
 
             with col_item2:
                 # Multiselect de Pacotes de Aventureiro & Mochila
                 all_packs = get_equipment_packs_list()
+                curr_equip = form_data.get("equipment", "")
+                def_packs = [p for p in all_packs if p in curr_equip or p.split(" (")[0] in curr_equip]
                 selected_packs = st.multiselect(
                     "Pacotes de Aventureiro & Kits Pré-definidos:",
                     options=all_packs,
-                    default=[p for p in all_packs if p in form_data.get("equipment", "")]
+                    default=def_packs
                 )
                 equipment_custom = st.text_area(
                     "Outros Equipamentos Avulsos na Mochila:",
-                    value=form_data.get("equipment", "")
+                    value=curr_equip
                 )
 
             # Moedas
@@ -496,18 +499,23 @@ def render_character_management_tab(agent, username: Optional[str] = None):
                 # Idiomas Oficiais
                 all_languages_preset = get_languages_list()
                 curr_lang_str = form_data.get("proficiencies_languages", "")
+                def_langs = [l for l in all_languages_preset if any(l.split(" (")[0].lower() in part.lower() for part in curr_lang_str.split("|"))]
+                if not def_langs and all_languages_preset:
+                    def_langs = [all_languages_preset[0]]
+                    
                 selected_languages = st.multiselect(
                     "Idiomas Falados e Escritos:",
                     options=all_languages_preset,
-                    default=[l for l in all_languages_preset if l in curr_lang_str] or ["Comum"]
+                    default=def_langs
                 )
                 
                 # Proficiências de Armas & Armaduras
                 all_profs_preset = get_armor_weapon_proficiencies_list()
+                def_profs = [p for p in all_profs_preset if any(p.split(" (")[0].lower() in part.lower() for part in curr_lang_str.split("|"))]
                 selected_profs = st.multiselect(
                     "Proficiências de Armas e Armaduras:",
                     options=all_profs_preset,
-                    default=[p for p in all_profs_preset if p in curr_lang_str]
+                    default=def_profs
                 )
 
             # Botão de Submissão do Formulário
