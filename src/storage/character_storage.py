@@ -19,20 +19,20 @@ def _get_char_dir(username: Optional[str] = None) -> str:
     return d
 
 def get_default_character_data() -> Dict[str, Any]:
-    """Retorna o template estruturado padrão de uma ficha oficial de D&D 5e / 2024."""
+    """Retorna o template estruturado neutro e limpo para criação de qualquer personagem oficial D&D 2024."""
     return {
         "id": "",
-        "name": "Novo Aventureiro",
+        "name": "",
         "player_name": "",
-        "species": "Humano",
-        "class_name": "Guerreiro",
-        "subclass": "Campeão",
+        "species": "",
+        "class_name": "",
+        "subclass": "",
         "level": 1,
-        "background": "Soldado",
-        "alignment": "Neutro e Bom",
+        "background": "",
+        "alignment": "",
         "experience_points": 0,
         
-        # Atributos Base
+        # Atributos Base (Padrão 10)
         "abilities": {
             "str": 10,
             "dex": 10,
@@ -43,7 +43,7 @@ def get_default_character_data() -> Dict[str, Any]:
         },
         
         # Salvaguardas Proficientes (chaves: 'str', 'dex', 'con', 'int', 'wis', 'cha')
-        "saving_throw_proficiencies": ["str", "con"],
+        "saving_throw_proficiencies": [],
         
         # Combate & Vitais
         "armor_class": 10,
@@ -52,23 +52,21 @@ def get_default_character_data() -> Dict[str, Any]:
         "hit_points_max": 10,
         "hit_points_current": 10,
         "hit_points_temp": 0,
-        "hit_dice": "1d10",
+        "hit_dice": "1d8",
         "death_saves": {"successes": 0, "failures": 0},
         
         # Perícias Proficientes e Especializações
-        "skill_proficiencies": ["atletismo", "percepcao"],
+        "skill_proficiencies": [],
         "skill_expertises": [],
         
-        # Ataques & Ações (lista de dicts: name, attack_bonus, damage, damage_type, mastery, notes)
-        "attacks": [
-            {"name": "Espada Longa", "attack_bonus": "+4", "damage": "1d8+2", "damage_type": "Cortante", "mastery": "Empurrão (Push)", "notes": "Versátil (1d10)"}
-        ],
+        # Ataques & Ações (lista limpa)
+        "attacks": [],
         
         # Conjuração de Magias
         "spellcasting": {
             "ability": "None",  # 'int', 'wis', 'cha' ou 'None'
             "save_dc": 10,
-            "attack_bonus": "+2",
+            "attack_bonus": "+0",
             "spell_slots": {
                 "level_1": {"max": 0, "current": 0},
                 "level_2": {"max": 0, "current": 0},
@@ -85,20 +83,20 @@ def get_default_character_data() -> Dict[str, Any]:
         },
         
         # Equipamento, Itens Mágicos e Moedas
-        "equipment": "Cota de Malha, Escudo, Mochila do Aventureiro",
+        "equipment": "",
         "magic_items": [],
         "currency": {
             "cp": 0,
             "sp": 0,
             "ep": 0,
-            "gp": 10,
+            "gp": 0,
             "pp": 0
         },
         
         # Talentos, Características e Idiomas
-        "feats": ["Valentão de Taverna (Origem)"],
-        "features_and_traits": "Segundo Fôlego, Estilo de Luta",
-        "proficiencies_languages": "Armaduras: Todas | Armas: Simples, Marciais | Idiomas: Comum",
+        "feats": [],
+        "features_and_traits": "",
+        "proficiencies_languages": "",
         
         # Biografia & Interpretação
         "personality_traits": "",

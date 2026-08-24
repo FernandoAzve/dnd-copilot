@@ -24,9 +24,9 @@ def cleanup_test_user():
         shutil.rmtree(test_dir, ignore_errors=True)
 
 def test_character_crud_and_active_context():
-    # 1. Testar template padrão
+    # 1. Testar template padrão limpo e neutro
     default_data = get_default_character_data()
-    assert default_data["name"] == "Novo Aventureiro"
+    assert default_data["name"] == ""
     assert "abilities" in default_data
     
     # 2. Criar personagem de teste (Magnus Brutus)

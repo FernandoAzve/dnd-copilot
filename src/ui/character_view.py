@@ -259,18 +259,18 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             st.markdown("#### 👤 1. Identificação & Origem")
             col_id1, col_id2, col_id3 = st.columns(3)
             with col_id1:
-                name_val = st.text_input("Nome do Personagem:", value=form_data.get("name", "Novo Aventureiro"))
+                name_val = st.text_input("Nome do Personagem:", value=form_data.get("name", ""), placeholder="Ex: Eladrin Arcanista")
                 
                 # Espécies 2024
                 all_species = get_species_list()
-                curr_species = form_data.get("species", "Humano")
+                curr_species = form_data.get("species", "")
                 species_idx = all_species.index(curr_species) if curr_species in all_species else 0
                 species_val = st.selectbox("Espécie / Raça Oficial (2024):", all_species, index=species_idx)
 
             with col_id2:
                 # Classes 2024
                 all_classes = get_classes_list()
-                curr_class = form_data.get("class_name", "Guerreiro")
+                curr_class = form_data.get("class_name", "")
                 class_idx = all_classes.index(curr_class) if curr_class in all_classes else 0
                 class_val = st.selectbox("Classe Principal (2024):", all_classes, index=class_idx)
                 
@@ -285,14 +285,14 @@ def render_character_management_tab(agent, username: Optional[str] = None):
                 
                 # Antecedentes 2024
                 all_backgrounds = get_backgrounds_list()
-                curr_bg = form_data.get("background", "Soldado")
+                curr_bg = form_data.get("background", "")
                 bg_idx = all_backgrounds.index(curr_bg) if curr_bg in all_backgrounds else 0
                 background_val = st.selectbox("Antecedente Oficial (2024):", all_backgrounds, index=bg_idx)
 
                 # Alinhamento / Tendência Oficial
                 all_alignments = get_alignments_list()
-                curr_align = form_data.get("alignment", "Neutro e Bom (Neutral Good)")
-                align_idx = all_alignments.index(curr_align) if curr_align in all_alignments else 1
+                curr_align = form_data.get("alignment", "")
+                align_idx = all_alignments.index(curr_align) if curr_align in all_alignments else 0
                 alignment_val = st.selectbox("Alinhamento / Tendência:", all_alignments, index=align_idx)
 
             st.divider()
@@ -328,8 +328,7 @@ def render_character_management_tab(agent, username: Optional[str] = None):
                 hp_cur_val = st.number_input("PV Atual:", min_value=0, max_value=1000, value=int(form_data.get("hit_points_current", 10)))
             with col_c3:
                 hp_tmp_val = st.number_input("PV Temporário:", min_value=0, max_value=500, value=int(form_data.get("hit_points_temp", 0)))
-                default_hit_die = CLASSES_2024.get(class_val, {}).get("hit_die", "1d10")
-                hit_dice_val = st.text_input("Dados de Vida:", value=form_data.get("hit_dice", default_hit_die))
+                hit_dice_val = st.text_input("Dados de Vida:", value=form_data.get("hit_dice", "1d8"), placeholder="Ex: 1d10, 1d8, 1d6")
             with col_c4:
                 init_val = st.number_input("Bônus de Iniciativa:", min_value=-10, max_value=20, value=int(form_data.get("initiative_bonus", 0)))
                 xp_val = st.number_input("Pontos de Experiência (XP):", min_value=0, max_value=1000000, value=int(form_data.get("experience_points", 0)))
@@ -341,21 +340,20 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             st.caption("Marque as salvaguardas e perícias em que o personagem possui proficiência (●):")
             
             saving_current = form_data.get("saving_throw_proficiencies", [])
-            class_native_saves = CLASSES_2024.get(class_val, {}).get("saving_throws", [])
             
             col_s1, col_s2, col_s3, col_s4, col_s5, col_s6 = st.columns(6)
             with col_s1:
-                save_str = st.checkbox("Salv. FOR", value=("str" in saving_current or "str" in class_native_saves))
+                save_str = st.checkbox("Salv. FOR", value=("str" in saving_current))
             with col_s2:
-                save_dex = st.checkbox("Salv. DES", value=("dex" in saving_current or "dex" in class_native_saves))
+                save_dex = st.checkbox("Salv. DES", value=("dex" in saving_current))
             with col_s3:
-                save_con = st.checkbox("Salv. CON", value=("con" in saving_current or "con" in class_native_saves))
+                save_con = st.checkbox("Salv. CON", value=("con" in saving_current))
             with col_s4:
-                save_int = st.checkbox("Salv. INT", value=("int" in saving_current or "int" in class_native_saves))
+                save_int = st.checkbox("Salv. INT", value=("int" in saving_current))
             with col_s5:
-                save_wis = st.checkbox("Salv. SAB", value=("wis" in saving_current or "wis" in class_native_saves))
+                save_wis = st.checkbox("Salv. SAB", value=("wis" in saving_current))
             with col_s6:
-                save_cha = st.checkbox("Salv. CAR", value=("cha" in saving_current or "cha" in class_native_saves))
+                save_cha = st.checkbox("Salv. CAR", value=("cha" in saving_current))
 
             skills_current = [s.lower() for s in form_data.get("skill_proficiencies", [])]
             col_sk1, col_sk2, col_sk3 = st.columns(3)
@@ -378,6 +376,7 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             attacks_text = st.text_area(
                 "Configuração de Ataques (Lista JSON de armas):",
                 value=attacks_json_str,
+                placeholder="Exemplo:\n[\n  {\n    \"name\": \"Espada Longa\",\n    \"attack_bonus\": \"+5\",\n    \"damage\": \"1d8+3\",\n    \"damage_type\": \"Cortante\",\n    \"mastery\": \"Empurrão (Push)\"\n  }\n]",
                 help="Lista de armas contendo nome, bônus de ataque, dano, tipo de dano e maestria oficial de 2024."
             )
 
@@ -398,14 +397,15 @@ def render_character_management_tab(agent, username: Optional[str] = None):
                 )
                 magic_items_custom = st.text_area(
                     "Outros Itens Mágicos / Customizados (um por linha):",
-                    value="\n".join([i for i in curr_items if not any(i.lower() in p.lower() for p in all_magic_items_preset)])
+                    value="\n".join([i for i in curr_items if not any(i.lower() in p.lower() for p in all_magic_items_preset)]),
+                    placeholder="Ex: Anel de Resistência a Fogo"
                 )
 
             with col_item2:
                 # Multiselect de Pacotes de Aventureiro & Mochila
                 all_packs = get_equipment_packs_list()
                 curr_equip = form_data.get("equipment", "")
-                def_packs = [p for p in all_packs if p in curr_equip or p.split(" (")[0] in curr_equip]
+                def_packs = [p for p in all_packs if curr_equip and (p in curr_equip or p.split(" (")[0] in curr_equip)]
                 selected_packs = st.multiselect(
                     "Pacotes de Aventureiro & Kits Pré-definidos:",
                     options=all_packs,
@@ -413,17 +413,18 @@ def render_character_management_tab(agent, username: Optional[str] = None):
                 )
                 equipment_custom = st.text_area(
                     "Outros Equipamentos Avulsos na Mochila:",
-                    value=curr_equip
+                    value=curr_equip,
+                    placeholder="Ex: 50m de corda de seda, 2 tochas, 1 cantil..."
                 )
 
             # Moedas
             st.markdown("**💰 Moedas & Tesouro:**")
-            curr = form_data.get("currency", {"cp": 0, "sp": 0, "ep": 0, "gp": 10, "pp": 0})
+            curr = form_data.get("currency", {"cp": 0, "sp": 0, "ep": 0, "gp": 0, "pp": 0})
             col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
             with col_m1: cp_val = st.number_input("PC (Cobre):", min_value=0, value=int(curr.get("cp", 0)))
             with col_m2: sp_val = st.number_input("PP (Prata):", min_value=0, value=int(curr.get("sp", 0)))
             with col_m3: ep_val = st.number_input("PE (Electrum):", min_value=0, value=int(curr.get("ep", 0)))
-            with col_m4: gp_val = st.number_input("PO (Ouro):", min_value=0, value=int(curr.get("gp", 10)))
+            with col_m4: gp_val = st.number_input("PO (Ouro):", min_value=0, value=int(curr.get("gp", 0)))
             with col_m5: pp_val = st.number_input("PL (Platina):", min_value=0, value=int(curr.get("pp", 0)))
 
             st.divider()
@@ -443,7 +444,7 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             with col_sp2:
                 sp_dc_val = st.number_input("CD de Salvaguarda de Magia:", min_value=8, max_value=30, value=int(sp_data.get("save_dc", 10)))
             with col_sp3:
-                sp_atk_val = st.text_input("Bônus de Ataque Mágico:", value=str(sp_data.get("attack_bonus", "+2")))
+                sp_atk_val = st.text_input("Bônus de Ataque Mágico:", value=str(sp_data.get("attack_bonus", "+0")), placeholder="+0")
 
             # Multiselect de Truques e Magias Canônicas
             all_cantrips_preset = get_cantrips_list()
@@ -452,21 +453,23 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             col_sp_list1, col_sp_list2 = st.columns(2)
             with col_sp_list1:
                 curr_cantrips = sp_data.get("cantrips", [])
+                def_cantrips = [c for c in all_cantrips_preset if any(c_name.lower() in c.lower() for c_name in curr_cantrips)]
                 selected_cantrips = st.multiselect(
                     "Truques Oficiais Conhecidos (Nível 0):",
                     options=all_cantrips_preset,
-                    default=[c for c in all_cantrips_preset if any(c_name in c for c_name in curr_cantrips)]
+                    default=def_cantrips
                 )
-                custom_cantrips = st.text_area("Truques Customizados / Outros (um por linha):", value="\n".join([c for c in curr_cantrips if not any(c in p for p in all_cantrips_preset)]))
+                custom_cantrips = st.text_area("Truques Customizados / Outros (um por linha):", value="\n".join([c for c in curr_cantrips if not any(c.lower() in p.lower() for p in all_cantrips_preset)]), placeholder="Ex: Rajada de Luz (Homebrew)")
                 
             with col_sp_list2:
                 curr_spells = sp_data.get("spells_known_or_prepared", [])
+                def_spells = [s for s in all_leveled_spells_preset if any(s_name.lower() in s.lower() for s_name in curr_spells)]
                 selected_spells = st.multiselect(
                     "Magias Oficiais Preparadas (1º ao 9º Círculo):",
                     options=all_leveled_spells_preset,
-                    default=[s for s in all_leveled_spells_preset if any(s_name in s for s_name in curr_spells)]
+                    default=def_spells
                 )
-                custom_spells = st.text_area("Magias Customizadas / Outras (uma por linha):", value="\n".join([s for s in curr_spells if not any(s in p for p in all_leveled_spells_preset)]))
+                custom_spells = st.text_area("Magias Customizadas / Outras (uma por linha):", value="\n".join([s for s in curr_spells if not any(s.lower() in p.lower() for p in all_leveled_spells_preset)]), placeholder="Ex: Bola de Relâmpagos (Homebrew)")
 
             st.divider()
 
@@ -476,32 +479,32 @@ def render_character_management_tab(agent, username: Optional[str] = None):
             # Habilidades pré-definidas da classe selecionada
             class_features_preset = get_class_features_list(class_val)
             curr_features_str = form_data.get("features_and_traits", "")
+            def_features = [f for f in class_features_preset if curr_features_str and f.split("(")[0].strip().lower() in curr_features_str.lower()]
             selected_features = st.multiselect(
-                f"Habilidades Oficiais da Classe ({class_val} 2024):",
+                "Habilidades Oficiais da Classe Selecionada:",
                 options=class_features_preset,
-                default=[f for f in class_features_preset if f.split("(")[0].strip() in curr_features_str]
+                default=def_features
             )
-            custom_features = st.text_area("Outras Características Especiais / Subclasse:", value=curr_features_str)
+            custom_features = st.text_area("Outras Características Especiais / Traços:", value=curr_features_str, placeholder="Ex: Características raciais, habilidades de subclasse ou poderes divinos...")
 
             col_ft1, col_ft2 = st.columns(2)
             with col_ft1:
                 # Talentos 2024
                 all_feats_preset = get_feats_list()
                 curr_feats = form_data.get("feats", [])
+                def_feats = [f for f in all_feats_preset if any(f_name.lower() in f.lower() for f_name in curr_feats)]
                 selected_feats = st.multiselect(
                     "Talentos Oficiais D&D 2024 (Origem & Gerais):",
                     options=all_feats_preset,
-                    default=[f for f in all_feats_preset if any(f_name in f for f_name in curr_feats)]
+                    default=def_feats
                 )
-                custom_feats = st.text_area("Outros Talentos (um por linha):", value="\n".join([f for f in curr_feats if not any(f in p for p in all_feats_preset)]))
+                custom_feats = st.text_area("Outros Talentos (um por linha):", value="\n".join([f for f in curr_feats if not any(f.lower() in p.lower() for p in all_feats_preset)]), placeholder="Ex: Talento Customizado")
 
             with col_ft2:
                 # Idiomas Oficiais
                 all_languages_preset = get_languages_list()
                 curr_lang_str = form_data.get("proficiencies_languages", "")
-                def_langs = [l for l in all_languages_preset if any(l.split(" (")[0].lower() in part.lower() for part in curr_lang_str.split("|"))]
-                if not def_langs and all_languages_preset:
-                    def_langs = [all_languages_preset[0]]
+                def_langs = [l for l in all_languages_preset if curr_lang_str and any(l.split(" (")[0].lower() in part.lower() for part in curr_lang_str.split("|"))]
                     
                 selected_languages = st.multiselect(
                     "Idiomas Falados e Escritos:",
@@ -511,7 +514,7 @@ def render_character_management_tab(agent, username: Optional[str] = None):
                 
                 # Proficiências de Armas & Armaduras
                 all_profs_preset = get_armor_weapon_proficiencies_list()
-                def_profs = [p for p in all_profs_preset if any(p.split(" (")[0].lower() in part.lower() for part in curr_lang_str.split("|"))]
+                def_profs = [p for p in all_profs_preset if curr_lang_str and any(p.split(" (")[0].lower() in part.lower() for part in curr_lang_str.split("|"))]
                 selected_profs = st.multiselect(
                     "Proficiências de Armas e Armaduras:",
                     options=all_profs_preset,
