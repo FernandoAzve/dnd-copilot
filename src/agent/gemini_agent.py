@@ -80,7 +80,7 @@ class DnDAgent:
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
         self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
         self.mode = mode
-        self.kb = DnDKnowledgeBase()
+        self.kb = DnDKnowledgeBase(api_key=self.api_key)
         self.chat_session = None
         self.history: List[Dict[str, Any]] = []
         self._init_client()
@@ -92,6 +92,8 @@ class DnDAgent:
             try:
                 from google import genai
                 self.client = genai.Client(api_key=self.api_key)
+                if hasattr(self, "kb") and self.kb:
+                    self.kb.update_api_key(self.api_key)
             except Exception as e:
                 print(f"Erro ao inicializar Google GenAI Client: {e}")
 
@@ -99,6 +101,8 @@ class DnDAgent:
         changed = False
         if api_key is not None and api_key != self.api_key:
             self.api_key = api_key
+            if hasattr(self, "kb") and self.kb:
+                self.kb.update_api_key(api_key)
             changed = True
         if model_name is not None and model_name != self.model_name:
             self.model_name = model_name

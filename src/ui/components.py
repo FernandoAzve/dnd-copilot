@@ -49,21 +49,43 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
         st.markdown("## 🧙‍♂️ **Grimório do Sábio**")
         st.caption("Assistente & Mentor de D&D 5e / 2024")
         
-        # 1. NAVEGAÇÃO PRINCIPAL ENTRE MÓDULOS (GRIMÓRIO VS AUDITOR DE FICHAS)
-        col_nav1, col_nav2 = st.columns(2)
+        # 1. NAVEGAÇÃO PRINCIPAL ENTRE OS 3 MÓDULOS
+        col_nav1, col_nav2, col_nav3 = st.columns(3)
         is_chat_active = (current_view == "chat")
+        is_chars_active = (current_view == "characters")
+        is_sheets_active = (current_view in ["sheets", "audit"])
+        
         with col_nav1:
             if st.button("💬 **Grimório**", key="nav_btn_chat", use_container_width=True, type="primary" if is_chat_active else "secondary"):
                 st.session_state["main_view"] = "chat"
                 st.rerun()
         with col_nav2:
-            if st.button("📋 **Fichas**", key="nav_btn_sheets", use_container_width=True, type="secondary" if is_chat_active else "primary"):
+            if st.button("🛡️ **Heróis**", key="nav_btn_chars", use_container_width=True, type="primary" if is_chars_active else "secondary"):
+                st.session_state["main_view"] = "characters"
+                st.rerun()
+        with col_nav3:
+            if st.button("📋 **Auditoria**", key="nav_btn_sheets", use_container_width=True, type="primary" if is_sheets_active else "secondary"):
                 st.session_state["main_view"] = "sheets"
                 st.rerun()
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Destaque do Personagem Ativo no Contexto
+        try:
+            from ..storage.character_storage import get_active_character_id, get_character
+            act_id = get_active_character_id(username)
+            act_char = get_character(act_id, username) if act_id else None
+            if act_char:
+                st.markdown(
+                    f"<div style='background-color: var(--input-bg); border: 1px solid var(--primary-gold); border-radius: 6px; padding: 4px 8px; margin: 8px 0; font-size: 0.78rem; text-align: center;'>"
+                    f"🛡️ <b>Ativo no Chat:</b> {act_char.get('name', 'Herói')} ({act_char.get('class_name', '')} {act_char.get('level', 1)})"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+        except Exception:
+            pass
 
-        # 2. HISTÓRICO CONTEXTUAL (CHAT DE REGRAS VS AUDITOR DE FICHAS)
+        st.markdown("<hr style='margin: 8px 0; border-color: var(--border-color);'>", unsafe_allow_html=True)
+
+        # 2. HISTÓRICO CONTEXTUAL
         if current_view == "chat":
             # Botão Nova Conversa
             if st.button("➕ **Nova Conversa**", key="btn_new_chat", use_container_width=True, type="primary"):
@@ -106,6 +128,12 @@ def render_sidebar(agent, user_data: Optional[Dict[str, Any]] = None):
                                     st.session_state["current_session_id"] = new_id
                                     st.session_state["messages"] = load_session(new_id, username=username)["messages"]
                                 st.rerun()
+
+        elif current_view == "characters":
+            if st.button("➕ **Novo Herói**", key="btn_new_hero", use_container_width=True, type="primary"):
+                st.session_state["editing_character_id"] = ""
+                st.session_state["character_form_data"] = None
+                st.rerun()
 
         else:
             # Botão Nova Ficha

@@ -9,6 +9,7 @@ from src.agent.gemini_agent import DnDAgent
 from src.ui.styles import apply_custom_styles
 from src.ui.components import render_sidebar, render_chat_message
 from src.ui.sheet_view import render_sheet_auditor_tab
+from src.ui.character_view import render_character_management_tab
 from src.auth.auth_ui import render_auth_page
 from src.auth.security import validate_session_token
 from src.auth.user_manager import get_user_profile
@@ -17,6 +18,11 @@ from src.storage.chat_storage import (
     save_session,
     load_session,
     list_sessions
+)
+from src.storage.character_storage import (
+    get_active_character_id,
+    get_character,
+    format_character_context
 )
 
 # Configuração da Página
@@ -162,19 +168,24 @@ if st.session_state["main_view"] == "chat":
         st.session_state.messages.append({"role": "user", "content": user_query})
         render_chat_message("user", user_query)
 
-        # 2. Obter resposta do agente com STREAMING em tempo real
+        # 2. Obter contexto do personagem ativo (se houver)
+        act_id = get_active_character_id(username)
+        act_char = get_character(act_id, username) if act_id else None
+        char_context = format_character_context(act_char) if act_char else ""
+
+        # 3. Obter resposta do agente com STREAMING em tempo real e contexto do personagem
         with st.chat_message("model", avatar="🧙‍♂️"):
-            stream_gen = st.session_state.agent.stream_query(user_query)
+            stream_gen = st.session_state.agent.stream_query(user_query, character_context=char_context)
             bot_text = st.write_stream(stream_gen)
 
-        # 3. Adicionar mensagem completa do agente ao histórico em memória
+        # 4. Adicionar mensagem completa do agente ao histórico em memória
         st.session_state.messages.append({
             "role": "model",
             "content": bot_text,
             "tool_logs": []
         })
         
-        # 4. Salvar permanentemente no diretório privado do usuário
+        # 5. Salvar permanentemente no diretório privado do usuário
         save_session(
             session_id=st.session_state["current_session_id"],
             messages=st.session_state.messages,
@@ -183,6 +194,10 @@ if st.session_state["main_view"] == "chat":
             username=username
         )
         st.rerun()
+
+elif st.session_state["main_view"] == "characters":
+    # Módulo Central de Heróis do Jogador
+    render_character_management_tab(st.session_state.agent, username=username)
 
 else:
     # Auditor de Fichas com histórico isolado por usuário
